@@ -1129,28 +1129,7 @@ window.buildFastEncodingGrid = function() {
               }
           };
 
-        // NEW: Smart Auto-Calculation Engine for Batch Rows
-  window.autoCalcRowVal = function(element) {
-      // Find the specific row the user is typing in
-      const row = element.closest('.batch-item-row');
-      if(!row) return;
-      
-      const sku = row.querySelector('.batch-sku').value;
-      const qty = parseFloat(row.querySelector('.batch-qty').value) || 0;
-      const amtInput = row.querySelector('.batch-amt');
-      
-      // If we have a valid SKU and a Qty, calculate the exact Gross Value
-      if(sku && window.SKU_DATA && window.SKU_DATA[sku]) {
-          const price = parseFloat(window.SKU_DATA[sku].price) || 0;
-          if(qty > 0) {
-              amtInput.value = (price * qty).toFixed(2);
-          } else {
-              amtInput.value = "";
-          }
-      }
-  };
-
-  // --- ATOMIC BATCH WRITE ENGINE (Saves all to cloud at once) ---
+         // --- ATOMIC BATCH WRITE ENGINE (Saves all to cloud at once) ---
   window.submitManualSale = async function(e) {
       e.preventDefault();
       
