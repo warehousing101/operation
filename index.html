@@ -1566,43 +1566,31 @@ window.buildFastEncodingGrid = function() {
       // Inject Top Level Metrics
       document.getElementById('dash-top-rev').innerText = `₱${totalRev.toLocaleString(undefined, {minimumFractionDigits:2})}`;
       
-// EXACT 1:1 MATCH WITH MASTER INVENTORY TABLE
+    // ENTERPRISE: GLOBAL ASSET VALUE (Using Snapshot Engine)
       let globalAssetValue = 0;
-      let invData = {};
-      const timeFilter = document.getElementById('master-time-filter') ? document.getElementById('master-time-filter').value : 'ALL';
-
+      let globalInv = {};
       if(window.SKU_DATA) {
           Object.keys(window.SKU_DATA).forEach(sku => {
-              let baseline = 0;
-              if (timeFilter === 'MONTH' && window.CURRENT_SNAPSHOT && window.CURRENT_SNAPSHOT[sku]) {
-                  baseline = window.CURRENT_SNAPSHOT[sku].qty;
-              }
-              invData[sku] = { price: parseFloat(window.SKU_DATA[sku].price) || 0, net: baseline };
+              const safePrice = parseFloat(window.SKU_DATA[sku].price) || 0;
+              // WIRE: Inject the snapshot baseline if it exists, otherwise start at 0
+              let baseQty = (window.CURRENT_SNAPSHOT && window.CURRENT_SNAPSHOT[sku]) ? window.CURRENT_SNAPSHOT[sku].qty : 0;
+              globalInv[sku] = { price: safePrice, qty: baseQty };
           });
+          window.GLOBAL_TRANSACTIONS.forEach(tx => {
+              if(!globalInv[tx.sku]) return;
 
-          if (window.GLOBAL_TRANSACTIONS) {
-              window.GLOBAL_TRANSACTIONS.forEach(tx => {
-                  if(!invData[tx.sku]) return;
-                  
-                  if (timeFilter === 'MONTH' && startDateStr && endDateStr) {
-                      const txDate = tx.timestamp.substring(0, 10);
-                      if (txDate < startDateStr || txDate > endDateStr) return; 
-                  }
-
-                  const qty = parseFloat(tx.qty) || 0;
-                  const isOut = (tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT');
-                  const isIn = (tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN');
-
-                  if (isOut) invData[tx.sku].net -= qty;
-                  if (isIn) invData[tx.sku].net += qty;
-              });
-          }
-
-          Object.keys(invData).forEach(sku => {
-              if ((sku === 'SET B' || sku.includes('SET')) && invData[sku].net < 0) {
-                  invData[sku].net = 0;
-              }
-              globalAssetValue += (invData[sku].net * invData[sku].price);
+              const txDate = tx.timestamp.substring(0, 10);
+              // WIRE: We now ONLY process transactions from the actively selected month!
+              if (txDate < startDateStr || txDate > endDateStr) return;
+                      
+                      const qty = parseFloat(tx.qty) || 0;
+                      // NEW: We now deduct BUNDLE_OUT and add MANUAL_IN / BUNDLE_IN to the Global Asset Value!
+                      if(tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT') globalInv[tx.sku].qty -= qty;
+                      else if(tx.record_type === 'TRANSFER' && tx.store === tx.dest_store) globalInv[tx.sku].qty += qty;
+                      else if(tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN') globalInv[tx.sku].qty += qty;
+                  });
+          Object.keys(globalInv).forEach(sku => {
+              if(globalInv[sku].qty > 0) globalAssetValue += (globalInv[sku].qty * globalInv[sku].price);
           });
       }
       const assetBox = document.getElementById('dash-top-asset');
