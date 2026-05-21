@@ -99,7 +99,9 @@
 
     <datalist id="global-sku-list"></datalist>
 
-    <aside class="sidebar-container text-white flex flex-col shadow-2xl shrink-0 z-50">
+    <div id="sidebar-overlay" onclick="window.toggleMobileMenu()" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[55] hidden md:hidden transition-opacity"></div>
+
+    <aside id="mobile-sidebar" class="sidebar-container text-white flex flex-col shadow-2xl shrink-0 z-[60] absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="p-8 mb-2">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border border-white/30 backdrop-blur-md">
@@ -188,9 +190,12 @@
 
     <main class="flex-1 flex flex-col min-w-0 relative">
         
-        <header class="h-20 bg-white/90 backdrop-blur-md px-8 flex justify-between items-center border-b border-slate-200 sticky top-0 z-40">
-            <div>
-                <h2 id="view-title" class="text-2xl font-black text-slate-800 tracking-tight">Executive Dashboard</h2>
+        <header class="h-20 bg-white/90 backdrop-blur-md px-4 md:px-8 flex justify-between items-center border-b border-slate-200 sticky top-0 z-40">
+            <div class="flex items-center gap-3">
+                <button onclick="window.toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-emerald-100 hover:text-emerald-600 transition-colors shadow-sm">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+                <h2 id="view-title" class="text-xl md:text-2xl font-black text-slate-800 tracking-tight truncate max-w-[180px] md:max-w-none">Executive Dashboard</h2>
             </div>
             <div class="flex items-center gap-6">
                 
@@ -783,6 +788,16 @@
                 <div class="md:col-span-4 mt-2"><button type="submit" class="w-full py-4 bg-indigo-600 text-white font-black rounded-xl text-xs shadow-md hover:bg-indigo-700 uppercase tracking-widest">Create User Account</button></div>
             </form>
         </div>
+<div class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-sm border-t-4 border-amber-500 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h4 class="font-black text-white uppercase tracking-widest text-xs mb-1"><i class="fa-solid fa-camera text-amber-500 mr-2"></i> System Snapshot Generator</h4>
+                <p class="text-[10px] text-slate-400">Force the system to bake current inventory into a permanent month-end record.</p>
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+                <input type="month" id="manual-snapshot-month" onclick="this.showPicker()" class="form-input py-2 text-xs w-full md:w-auto" style="color-scheme: dark;">
+                <button type="button" onclick="const val = document.getElementById('manual-snapshot-month').value; if(val){ window.generateMonthlySnapshot(val.split('-')[0], val.split('-')[1]); }" class="px-6 py-2 bg-amber-500 text-slate-900 font-black rounded-xl text-xs hover:bg-amber-400 shadow-md uppercase tracking-widest transition-colors shrink-0">Generate</button>
+            </div>
+        </div>
         <div class="glass-card overflow-hidden border border-slate-200 shadow-sm">
             <div class="p-4 bg-slate-800 text-white flex justify-between items-center"><h4 class="font-black tracking-widest uppercase text-xs"><i class="fa-solid fa-users mr-2 text-indigo-400"></i> Active Users</h4></div>
             <div class="overflow-y-auto custom-scrollbar h-[350px]">
@@ -1322,13 +1337,16 @@ window.buildFastEncodingGrid = function() {
 
   window.setupLedgerListener = function() {
       const ledgerRef = collection(db, "transaction_ledger");
-      const q = query(ledgerRef, orderBy("timestamp", "desc"), limit(1000));
+      // REMOVED limit(1000) so April/May Beginning Inventory calculates perfectly.
+      // Keeping "desc" so the newest records stay at the top of the audit ledger.
+      const q = query(ledgerRef, orderBy("timestamp", "desc")); 
 
-      onSnapshot(q, (snapshot) => {
-          // SMART FIX: Only count actual server changes, not the local cache!
+      onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
+         // ENTERPRISE FIX: Strictly monitor server-side reads to protect Spark Plan
           if (!snapshot.metadata.fromCache) {
-              let serverReads = snapshot.docChanges().length;
-              window.trackFirebaseRead(serverReads === 0 ? 1 : serverReads); // Firebase charges 1 minimum read for the connection check
+              // Only count documents that actually triggered a read from the Google servers
+              const serverReads = snapshot.docChanges().filter(change => !change.doc.metadata.fromCache).length;
+              window.trackFirebaseRead(serverReads === 0 ? 1 : serverReads); 
           }
 
           window.GLOBAL_TRANSACTIONS = [];
@@ -1409,7 +1427,7 @@ window.buildFastEncodingGrid = function() {
 
 // NEW DATE SYNCER
 // RESTORED MONTH SYNCER
-  window.syncGlobalMonth = function() {
+ window.syncGlobalMonth = async function() {
       const monthVal = document.getElementById('global-month-filter').value; 
       if(!monthVal) return;
       const year = parseInt(monthVal.split('-')[0]); const month = parseInt(monthVal.split('-')[1]);
@@ -1417,11 +1435,26 @@ window.buildFastEncodingGrid = function() {
       document.getElementById('dash-start-date').value = new Date(year, month - 1, 1).toLocaleDateString('en-CA'); 
       document.getElementById('dash-end-date').value = new Date(year, month, 0).toLocaleDateString('en-CA');
       
-      if(window.CURRENT_OUTLET && window.CURRENT_OUTLET.name) window.refreshOutletDashboard();
-      if(window.renderRegionalDrilldown) window.renderRegionalDrilldown();
-      if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
-  };
+      // --- SNAPSHOT INTERCEPTOR ---
+      // Calculate the exact previous month to serve as our Beginning Inventory baseline
+      let prevM = month - 1; let prevY = year;
+      if (prevM === 0) { prevM = 12; prevY = year - 1; }
+      const baselineStr = `${prevY}-${String(prevM).padStart(2, '0')}`;
 
+      window.CURRENT_SNAPSHOT = null; // Reset cache
+      try {
+          const snapDoc = await getDoc(doc(db, "inventory_snapshots", baselineStr));
+          if (snapDoc.exists()) {
+              window.CURRENT_SNAPSHOT = snapDoc.data().inventory;
+          }
+      } catch(e) { console.warn("Baseline snapshot not found. Defaulting to standard calculation."); }
+
+      // Trigger the dashboards to re-render using the newly fetched baseline
+      if(window.CURRENT_OUTLET && window.CURRENT_OUTLET.name) { window.refreshOutletDashboard(); }
+      if(window.renderRegionalDrilldown) window.renderRegionalDrilldown(); 
+      if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
+      if(window.renderMasterInventory) window.renderMasterInventory(); 
+  };
   // NEW SPECIFIC DATE ANALYZER
 // NEW SPECIFIC DATE ANALYZER (UPGRADED & WIRED TO DASHBOARD)
   window.analyzeSpecificDate = function() {
@@ -1533,29 +1566,43 @@ window.buildFastEncodingGrid = function() {
       // Inject Top Level Metrics
       document.getElementById('dash-top-rev').innerText = `₱${totalRev.toLocaleString(undefined, {minimumFractionDigits:2})}`;
       
-     // BULLETPROOF: GLOBAL ASSET VALUE (Total Ending Inventory)
+// EXACT 1:1 MATCH WITH MASTER INVENTORY TABLE
       let globalAssetValue = 0;
-      let globalInv = {};
+      let invData = {};
+      const timeFilter = document.getElementById('master-time-filter') ? document.getElementById('master-time-filter').value : 'ALL';
+
       if(window.SKU_DATA) {
           Object.keys(window.SKU_DATA).forEach(sku => {
-              const safePrice = parseFloat(window.SKU_DATA[sku].price) || 0;
-              globalInv[sku] = { price: safePrice, qty: 0 };
+              let baseline = 0;
+              if (timeFilter === 'MONTH' && window.CURRENT_SNAPSHOT && window.CURRENT_SNAPSHOT[sku]) {
+                  baseline = window.CURRENT_SNAPSHOT[sku].qty;
+              }
+              invData[sku] = { price: parseFloat(window.SKU_DATA[sku].price) || 0, net: baseline };
           });
-          window.GLOBAL_TRANSACTIONS.forEach(tx => {
-              if(!globalInv[tx.sku]) return;
 
-              // 🚨 THE TIME BLINDER FIX: Stop the dashboard from looking into the future!
+          if (window.GLOBAL_TRANSACTIONS) {
+              window.GLOBAL_TRANSACTIONS.forEach(tx => {
+                  if(!invData[tx.sku]) return;
+                  
+                  if (timeFilter === 'MONTH' && startDateStr && endDateStr) {
                       const txDate = tx.timestamp.substring(0, 10);
-                      if (txDate > endDateStr) return; // If we select April, completely ignore May!
-                      
-                      const qty = parseFloat(tx.qty) || 0;
-                      // NEW: We now deduct BUNDLE_OUT and add MANUAL_IN / BUNDLE_IN to the Global Asset Value!
-                      if(tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT') globalInv[tx.sku].qty -= qty;
-                      else if(tx.record_type === 'TRANSFER' && tx.store === tx.dest_store) globalInv[tx.sku].qty += qty;
-                      else if(tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN') globalInv[tx.sku].qty += qty;
-                  });
-          Object.keys(globalInv).forEach(sku => {
-              if(globalInv[sku].qty > 0) globalAssetValue += (globalInv[sku].qty * globalInv[sku].price);
+                      if (txDate < startDateStr || txDate > endDateStr) return; 
+                  }
+
+                  const qty = parseFloat(tx.qty) || 0;
+                  const isOut = (tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT');
+                  const isIn = (tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN');
+
+                  if (isOut) invData[tx.sku].net -= qty;
+                  if (isIn) invData[tx.sku].net += qty;
+              });
+          }
+
+          Object.keys(invData).forEach(sku => {
+              if ((sku === 'SET B' || sku.includes('SET')) && invData[sku].net < 0) {
+                  invData[sku].net = 0;
+              }
+              globalAssetValue += (invData[sku].net * invData[sku].price);
           });
       }
       const assetBox = document.getElementById('dash-top-asset');
@@ -1690,10 +1737,15 @@ window.buildFastEncodingGrid = function() {
 
       let invData = {};
       Object.keys(window.SKU_DATA).forEach(sku => {
-          invData[sku] = { name: window.SKU_DATA[sku].name, price: window.SKU_DATA[sku].price, in: 0, out: 0 };
+          let baseQty = 0;
+          // WIRE: Use the snapshot as the baseline for 'IN' if we are filtering by month
+          if (timeFilter === 'MONTH' && window.CURRENT_SNAPSHOT && window.CURRENT_SNAPSHOT[sku]) {
+              baseQty = window.CURRENT_SNAPSHOT[sku].qty;
+          }
+          invData[sku] = { name: window.SKU_DATA[sku].name, price: window.SKU_DATA[sku].price, in: baseQty, out: 0 };
       });
 
-      // Calculate Global Totals with Time Filter
+     // Calculate Global Totals with Time Filter
       window.GLOBAL_TRANSACTIONS.forEach(tx => {
           if(!invData[tx.sku]) return;
           
@@ -1703,8 +1755,14 @@ window.buildFastEncodingGrid = function() {
           }
 
           const qty = parseFloat(tx.qty) || 0;
-          if(tx.record_type === 'SALE' || tx.record_type === 'BO') invData[tx.sku].out += qty;
-          if(tx.record_type === 'INBOUND') invData[tx.sku].in += qty;
+          
+          // THE MATH FIX: Make the Master Table respect Bundles and Manual Entries!
+          if(tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT') {
+              invData[tx.sku].out += qty;
+          }
+          else if(tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN') {
+              invData[tx.sku].in += qty;
+          }
       });
 
       let html = '';
@@ -1932,12 +1990,17 @@ window.buildFastEncodingGrid = function() {
                   <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center group-focus:bg-emerald-400"><i class="fa-solid fa-globe text-xs"></i></div><div><p class="font-black text-sm text-slate-800 group-focus:text-white tracking-tight">Regional Overview</p><p class="text-[9px] font-bold text-emerald-700 group-focus:text-emerald-200 uppercase tracking-widest mt-0.5">All Stores Aggregated</p></div></div>
               </button>
           `;
-          listHTML += regionStores.map(store => `
-              <button onclick="viewOutletDashboard('${store.name}', '${store.type}')" class="w-full text-left p-3 mb-2 rounded-xl border border-slate-100 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-200 transition-colors group focus:bg-emerald-600 focus:text-white">
+         listHTML += regionStores.map(store => {
+              // This safely escapes the apostrophe so the browser doesn't crash!
+              const safeName = store.name.replace(/'/g, "\\'");
+              const safeType = store.type.replace(/'/g, "\\'");
+              return `
+              <button onclick="viewOutletDashboard('${safeName}', '${safeType}')" class="w-full text-left p-3 mb-2 rounded-xl border border-slate-100 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-200 transition-colors group focus:bg-emerald-600 focus:text-white">
                   <p class="font-black text-sm text-slate-800 group-focus:text-white tracking-tight">${store.name}</p>
                   <p class="text-[9px] font-bold text-slate-400 group-focus:text-emerald-200 uppercase tracking-widest mt-0.5">${store.type}</p>
               </button>
-          `).join('');
+              `;
+          }).join('');
           outletListContainer.innerHTML = listHTML;
       }
       
@@ -2022,19 +2085,7 @@ window.buildFastEncodingGrid = function() {
       window.refreshOutletDashboard();
   };
 
-window.syncGlobalMonth = function() {
-      const monthVal = document.getElementById('global-month-filter').value; 
-      if(!monthVal) return;
-      const year = parseInt(monthVal.split('-')[0]); const month = parseInt(monthVal.split('-')[1]);
-      
-      document.getElementById('dash-start-date').value = new Date(year, month - 1, 1).toLocaleDateString('en-CA'); 
-      document.getElementById('dash-end-date').value = new Date(year, month, 0).toLocaleDateString('en-CA');
-      
-      if(window.CURRENT_OUTLET && window.CURRENT_OUTLET.name) { window.refreshOutletDashboard(); }
-      if(window.renderRegionalDrilldown) window.renderRegionalDrilldown(); // NEW: Update the Region Totals!
-      if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
-      if(window.renderMasterInventory) window.renderMasterInventory(); // SYNCS THE INVENTORY TAB
-  };
+
 
   window.refreshOutletDashboard = function() {
       if(!window.CURRENT_OUTLET.name) return;
@@ -2725,6 +2776,59 @@ function applyRoleRestrictions() {
           window.showToast("Mock Dispatch Sent to WMS Database!", "success");
       } catch(e) { console.error(e); window.showToast("Test Dispatch Failed.", "error"); }
   };
+// --- END OF MONTH SNAPSHOT ENGINE ---
+  window.generateMonthlySnapshot = async function(year, month) {
+      const targetMonthStr = `${year}-${String(month).padStart(2, '0')}`;
+      const endOfMonthDate = new Date(year, month, 0, 23, 59, 59); 
+      const endOfMonthStr = endOfMonthDate.toISOString().substring(0, 16);
+
+      if(!window.GLOBAL_TRANSACTIONS || window.GLOBAL_TRANSACTIONS.length === 0) {
+          window.showToast("Ledger is empty, nothing to snapshot.", "warning");
+          return;
+      }
+
+      window.showToast(`Calculating snapshot for ${targetMonthStr}...`, "success");
+
+      let snapshotData = {
+          generated_at: window.getExactDatetimeLocal(),
+          period: targetMonthStr,
+          inventory: {}
+      };
+
+      Object.keys(window.SKU_DATA).forEach(sku => {
+          snapshotData.inventory[sku] = { qty: 0, asset_value: 0 };
+      });
+
+      window.GLOBAL_TRANSACTIONS.forEach(tx => {
+          const txDate = tx.timestamp.substring(0, 16);
+          if (txDate > endOfMonthStr) return; // Ignore future transactions!
+
+          if(!snapshotData.inventory[tx.sku]) return;
+
+          const qty = parseFloat(tx.qty) || 0;
+
+          if (tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT') {
+              snapshotData.inventory[tx.sku].qty -= qty;
+          } else if (tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN') {
+              snapshotData.inventory[tx.sku].qty += qty;
+          }
+      });
+
+      Object.keys(snapshotData.inventory).forEach(sku => {
+          if (snapshotData.inventory[sku].qty > 0) {
+              snapshotData.inventory[sku].asset_value = snapshotData.inventory[sku].qty * parseFloat(window.SKU_DATA[sku].price);
+          }
+      });
+
+      try {
+          const snapshotRef = doc(db, "inventory_snapshots", targetMonthStr);
+          await setDoc(snapshotRef, snapshotData);
+          window.showToast(`${targetMonthStr} Snapshot permanently locked in!`, "success");
+      } catch (error) {
+          console.error(error);
+          window.showToast("Failed to save snapshot to database.", "error");
+      }
+  };
 
   window.registerUser = async function(e) {
       e.preventDefault();
@@ -3017,7 +3121,7 @@ window.promptDeleteTx = function(id) {
       `);
   };
   
-  window.executeDeleteTx = async function(id) {
+window.executeDeleteTx = async function(id) {
       const approver = document.getElementById('modal-approver').value;
       const inputKey = document.getElementById('modal-delete-tx-key').value;
       const dbKey = (window.MASTER_DATA && window.MASTER_DATA.delete_key) ? window.MASTER_DATA.delete_key : "milfon080798";
@@ -3026,8 +3130,18 @@ window.promptDeleteTx = function(id) {
       if(inputKey !== dbKey) { window.showToast("ACCESS DENIED: Incorrect Passkey.", "error"); return; }
 
       try { 
+          const tx = window.GLOBAL_TRANSACTIONS.find(t => t.id === id);
+          
           await deleteDoc(doc(db, "transaction_ledger", id)); 
-          window.showToast(`Record wiped. Auth: ${approver}`, "success"); 
+          
+          // AUTO-HEAL SNAPSHOT TRIGGER
+          if (tx) {
+              const year = tx.timestamp.substring(0, 4);
+              const month = tx.timestamp.substring(5, 7);
+              window.generateMonthlySnapshot(year, month);
+          }
+
+          window.showToast(`Record wiped. Auth: ${approver}. Snapshot checked.`, "success"); 
           closeModal(); 
       } 
       catch(e) { window.showToast("Error wiping record.", "error"); }
@@ -3056,7 +3170,7 @@ window.promptDeleteTx = function(id) {
           </div>
       `);
   };
-  window.executeEditTx = async function(id) {
+window.executeEditTx = async function(id) {
       const app = document.getElementById('modal-tx-app').value;
       if(!app) { window.showToast("Approver name required to edit ledger.", "error"); return; }
       
@@ -3064,8 +3178,19 @@ window.promptDeleteTx = function(id) {
       const nQty = parseFloat(document.getElementById('modal-tx-qty').value);
       const nVal = parseFloat(document.getElementById('modal-tx-val').value);
       
-      try { await updateDoc(doc(db, "transaction_ledger", id), { sku: nSku, qty: nQty, val: nVal });
-          window.showToast(`Ledger overridden. Auth: ${app}`, "success"); closeModal(); 
+      try { 
+          await updateDoc(doc(db, "transaction_ledger", id), { sku: nSku, qty: nQty, val: nVal });
+          
+          // AUTO-HEAL SNAPSHOT TRIGGER
+          const tx = window.GLOBAL_TRANSACTIONS.find(t => t.id === id);
+          if (tx) {
+              const year = tx.timestamp.substring(0, 4);
+              const month = tx.timestamp.substring(5, 7);
+              window.generateMonthlySnapshot(year, month);
+          }
+
+          window.showToast(`Ledger overridden. Auth: ${app}. Snapshot checked.`, "success"); 
+          closeModal(); 
       } catch(e) { window.showToast("Error editing ledger.", "error"); }
   };
 
@@ -3100,9 +3225,17 @@ window.promptDeleteTx = function(id) {
             setTimeout(() => toast.remove(), 300);
         }, 3500);
     };
+// General UI Helpers
+    window.toggleMobileMenu = function() {
+        const sidebar = document.getElementById('mobile-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if(sidebar && overlay) {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+    };
 
-    // General UI Helpers
-    window.getExactDatetimeLocal = function() {
+window.getExactDatetimeLocal = function() {
         const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         return now.toISOString().slice(0, 16); 
     };
@@ -3125,13 +3258,23 @@ window.promptDeleteTx = function(id) {
         
         btnElement.className = `config-mod-btn flex-1 md:flex-none px-4 py-2 ${activeColor} text-xs font-black uppercase tracking-widest rounded-lg transition-all shadow-md flex items-center justify-center gap-2`;
     };
-    window.showTab = function(tabId, btnElement) {
+   window.showTab = function(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         if(btnElement) {
             btnElement.classList.add('active');
             document.getElementById('view-title').innerText = btnElement.innerText.trim();
+        }
+
+        // Auto-close mobile menu when a tab is tapped on small screens
+        if (window.innerWidth < 768) {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar && !sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
         }
 
         // SMART FIX: Auto-Resume Dashboard calculations when leaving the POS tab!
