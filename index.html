@@ -957,22 +957,18 @@ window.MASTER_DATA = data; // Save global reference for admin edits
                 if(filterType) filterType.innerHTML = `<option value="ALL">All Business Types</option>` + data.business_types.map(t => `<option value="${t}">${t}s Only</option>`).join('');
             }
 
-            // Populate SKUs
+           window.BUNDLE_MAP = data.bundles || {};
+
             if (data.skus) {
                 window.SKU_DATA = data.skus; 
                 const skuListEl = document.getElementById('global-sku-list');
                 if (skuListEl) skuListEl.innerHTML = Object.keys(data.skus).map(k => `<option value="${k}">${data.skus[k].name}</option>`).join('');
                 
-                // NEW: Populate the Master Ledger SKU Filter!
                 const masterSkuFilter = document.getElementById('master-filter-sku');
                 if(masterSkuFilter) masterSkuFilter.innerHTML = `<option value="ALL">All Products</option>` + Object.keys(data.skus).sort().map(k => `<option value="${k}">${k} - ${data.skus[k].name}</option>`).join('');
                 
-                // NEW: Auto-build the Fast Grid when settings load
                 if(window.buildFastEncodingGrid) window.buildFastEncodingGrid();
             }
-
-            // NEW: Load Dynamic Bundles from Cloud
-            window.BUNDLE_MAP = data.bundles || {};
 
             // Populate Outlets (The Smart Router!)
             if (data.outlets) {
@@ -1274,7 +1270,7 @@ window.buildFastEncodingGrid = function() {
       } catch (error) { window.showToast("Error saving SKU.", "error"); } finally { btn.innerHTML = origText; }
   };
 
-  // NEW: Save Dynamic Bundle Rule to Cloud
+// NEW: Save Dynamic Bundle Rule to Cloud & Auto-Publish SKU
   window.addBundleRule = async function(e) {
       e.preventDefault();
       const btn = e.target.querySelector('button');
@@ -1287,10 +1283,18 @@ window.buildFastEncodingGrid = function() {
           const masterRef = doc(db, "system_settings", "master");
           const docSnap = await getDoc(masterRef);
           let currentBundles = docSnap.exists() ? docSnap.data().bundles || {} : {};
+          let currentSkus = docSnap.exists() ? docSnap.data().skus || {} : {}; // Fetch Master SKUs
           
           currentBundles[bundleSku] = { component: compSku, qtyPerBundle: qty };
           
-          await updateDoc(masterRef, { bundles: currentBundles });
+          // DYNAMIC FIX: Auto-register the bundle as a Master SKU if it doesn't exist yet
+          if (!currentSkus[bundleSku]) {
+              currentSkus[bundleSku] = { name: bundleSku + " (Auto-Bundle)", price: 0 };
+          }
+          
+          // Save BOTH the bundle rule and the new SKU to the cloud simultaneously
+          await updateDoc(masterRef, { bundles: currentBundles, skus: currentSkus });
+          
           window.showToast(`Rule Linked: ${bundleSku} now extracts ${qty}x ${compSku}`, "success"); 
           e.target.reset(); 
           window.loadMasterSettings();
