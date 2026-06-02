@@ -20,11 +20,52 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Sidebar Styles */
-        .sidebar-container { background: linear-gradient(180deg, #064e3b 0%, #022c22 100%); width: 280px; }
-        .nav-link { transition: all 0.2s; border-radius: 12px; margin: 4px 16px; color: rgba(255,255,255,0.7); }
-        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
-        .nav-link.active { background: rgba(255,255,255,0.15); border-left: 4px solid #34d399; color: white; font-weight: 800; }
+        /* Sidebar Styles (Polished Upgraded) */
+        .sidebar-container { 
+            background-color: #022c22; 
+            background-image: radial-gradient(at 50% 0%, #064e3b 0px, transparent 50%), radial-gradient(at 100% 100%, #022c22 0px, transparent 50%); 
+            width: 280px; 
+            border-right: 1px solid rgba(255,255,255,0.05); 
+            box-shadow: inset -5px 0 15px rgba(0,0,0,0.1);
+        }
+        .nav-link { 
+            transition: all 0.3s ease; 
+            border-radius: 10px; 
+            margin: 4px 16px; 
+            color: #94a3b8; 
+            display: flex; 
+            align-items: center; 
+            padding: 10px 16px; 
+            position: relative; 
+            overflow: hidden; 
+            border: 1px solid transparent;
+        }
+        .nav-link i { transition: transform 0.3s ease; color: #64748b; }
+        .nav-link:hover { 
+            background: rgba(255,255,255,0.05); 
+            color: #f8fafc; 
+            transform: translateX(4px); 
+            border-color: rgba(255,255,255,0.1);
+        }
+        .nav-link:hover i { transform: scale(1.1); color: #f8fafc; }
+        .nav-link.active { 
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%); 
+            color: #34d399; 
+            font-weight: 900; 
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        .nav-link.active i { color: #34d399; }
+        .nav-link.active::before { 
+            content: ''; 
+            position: absolute; 
+            left: 0; 
+            top: 0; 
+            bottom: 0; 
+            width: 3px; 
+            background: #34d399; 
+            border-radius: 0 4px 4px 0; 
+            box-shadow: 0 0 12px #34d399; 
+        }
         
         /* Form Inputs */
         .form-input { width: 100%; padding: 0.75rem 1rem; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 0.75rem; transition: all 0.2s; font-size: 13px; font-weight: 700; color: #334155; }
@@ -347,20 +388,20 @@
             </section>
 
             <section id="regions" class="tab-content space-y-6">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-lg mr-4"><i class="fa-solid fa-map-location-dot"></i></div>
-                        <div>
-                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Territory Control</p>
-                            <select id="drilldown-region-select" onchange="renderRegionalDrilldown()" class="bg-transparent border-none outline-none font-black text-slate-800 text-2xl cursor-pointer">
-                                <option value="">Awaiting Database...</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="flex flex-wrap gap-2 text-center justify-end" id="regional-metrics-container">
-                        <p class="text-xs font-bold text-slate-400 italic">Calculating splits...</p>
-                    </div>
-                </div>
+                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <div class="flex items-center shrink-0">
+        <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-lg mr-4"><i class="fa-solid fa-map-location-dot"></i></div>
+        <div>
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Territory Control</p>
+            <select id="drilldown-region-select" onchange="renderRegionalDrilldown()" class="bg-transparent border-none outline-none font-black text-slate-800 text-2xl cursor-pointer">
+                <option value="">Awaiting Database...</option>
+            </select>
+        </div>
+    </div>
+    <div class="flex gap-3 overflow-x-auto custom-scrollbar pb-2 xl:pb-0 w-full xl:w-auto" id="regional-metrics-container">
+        <p class="text-xs font-bold text-slate-400 italic">Calculating splits...</p>
+    </div>
+</div>
 
                 <div class="glass-card bg-slate-900 border border-slate-800 p-5 shadow-lg">
                     <div class="flex justify-between items-end mb-4 border-b border-slate-700 pb-3">
@@ -657,24 +698,44 @@
             </section>
 <section id="audit-ledger" class="tab-content space-y-6">
                 <div class="glass-card overflow-hidden">
-                    <div class="p-8 bg-slate-900 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                        <div>
-                            <h3 class="text-2xl font-black tracking-tight">Master Audit Ledger</h3>
-                            <p class="text-blue-400 text-[10px] font-bold uppercase tracking-widest mt-1">Full Database History</p>
-                        </div>
-                        <div class="flex flex-col md:flex-row gap-3 w-full md:w-auto mt-4 md:mt-0">
-                            <select id="master-filter-store" onchange="searchMasterLedger()" class="bg-slate-800 border border-slate-700 text-slate-300 py-3 px-4 rounded-xl font-bold text-xs outline-none focus:border-blue-500 cursor-pointer shadow-sm">
-                                <option value="ALL">All Outlets</option>
-                            </select>
-                            <select id="master-filter-sku" onchange="searchMasterLedger()" class="bg-slate-800 border border-slate-700 text-slate-300 py-3 px-4 rounded-xl font-bold text-xs outline-none focus:border-blue-500 cursor-pointer shadow-sm">
-                                <option value="ALL">All Products</option>
-                            </select>
-                            <div class="relative w-full md:w-56">
-                                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input type="text" id="master-search-input" onkeyup="searchMasterLedger()" placeholder="Search Date, DR#..." class="w-full bg-slate-800 border border-slate-700 text-white pl-10 pr-4 py-3 rounded-xl font-bold text-xs outline-none focus:border-blue-500 transition-colors shadow-sm">
-                            </div>
-                        </div>
-                    </div>
+                    <div class="p-8 bg-slate-900 text-white flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 relative z-20">
+    <div>
+        <h3 class="text-2xl font-black tracking-tight">Master Audit Ledger</h3>
+        <p class="text-blue-400 text-[10px] font-bold uppercase tracking-widest mt-1">Full Database History</p>
+    </div>
+    <div class="flex flex-wrap gap-3 w-full xl:w-auto mt-4 xl:mt-0 justify-start xl:justify-end">
+        
+        <select id="master-filter-region" onchange="searchMasterLedger()" class="bg-slate-800 border border-slate-700 text-slate-300 py-2 px-3 rounded-xl font-bold text-xs outline-none focus:border-blue-500 cursor-pointer shadow-sm">
+            <option value="ALL">All Regions</option>
+        </select>
+        
+        <div class="relative w-full sm:w-auto min-w-[160px]">
+            <i class="fa-solid fa-store absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+            <input list="master-store-list" id="master-filter-store" onchange="searchMasterLedger()" placeholder="Search Outlet..." class="w-full bg-slate-800 border border-slate-700 text-slate-300 pl-8 pr-3 py-2 rounded-xl font-bold text-xs outline-none focus:border-blue-500 shadow-sm placeholder:text-slate-500">
+            <datalist id="master-store-list"></datalist>
+        </div>
+        
+        <div class="relative w-full sm:w-auto min-w-[160px]">
+            <i class="fa-solid fa-box absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]"></i>
+            <input list="master-sku-list" id="master-filter-sku" onchange="searchMasterLedger()" placeholder="Search SKU..." class="w-full bg-slate-800 border border-slate-700 text-slate-300 pl-8 pr-3 py-2 rounded-xl font-bold text-xs outline-none focus:border-blue-500 shadow-sm placeholder:text-slate-500">
+            <datalist id="master-sku-list"></datalist>
+        </div>
+        
+        <select id="master-filter-type" onchange="searchMasterLedger()" class="bg-slate-800 border border-slate-700 text-slate-300 py-2 px-3 rounded-xl font-bold text-xs outline-none focus:border-blue-500 cursor-pointer shadow-sm">
+            <option value="ALL">All Transactions</option>
+            <option value="SALE">Sales (Sold)</option>
+            <option value="TRANSFER">Transfers</option>
+            <option value="INBOUND">Inbound / Deliveries</option>
+            <option value="BO">Bad Orders (B.O.)</option>
+            <option value="MANUAL_IN">Manual Entry</option>
+        </select>
+        
+        <div class="relative w-full sm:w-auto min-w-[180px]">
+            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="master-search-input" onkeyup="searchMasterLedger()" placeholder="Search Date, Ref..." class="w-full bg-slate-800 border border-slate-700 text-white pl-9 pr-3 py-2 rounded-xl font-bold text-xs outline-none focus:border-blue-500 transition-colors shadow-sm">
+        </div>
+    </div>
+</div>
                     <div class="overflow-x-auto custom-scrollbar h-[600px]">
                         <table class="w-full text-left relative">
                             <thead class="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b border-slate-200 sticky top-0 z-10 shadow-sm">
@@ -887,7 +948,14 @@
                 <div><button type="submit" class="w-full py-4 bg-amber-500 text-white font-black rounded-xl text-xs shadow-md hover:bg-amber-600 uppercase tracking-widest transition-transform active:scale-95">Save Target</button></div>
             </form>
             
-            <div id="admin-quotas-list" class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+            <div class="mt-8 mb-4 flex justify-between items-center border-b border-slate-100 pb-2">
+                <h4 class="font-black text-slate-700 text-xs uppercase tracking-widest"><i class="fa-solid fa-list-check mr-2"></i>Active Quotas</h4>
+                <div class="relative w-48 md:w-64">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                    <input type="text" id="quota-search-input" onkeyup="window.renderQuotaList()" placeholder="Filter list..." class="w-full bg-slate-50 border border-slate-200 text-slate-700 pl-8 pr-3 py-1.5 rounded-lg font-bold text-[10px] outline-none focus:border-amber-500 transition-colors">
+                </div>
+            </div>
+            <div id="admin-quotas-list" class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <p class="text-xs text-slate-400 italic col-span-full">Loading quotas...</p>
             </div>
         </div>
@@ -1007,8 +1075,8 @@ window.MASTER_DATA = data; // Save global reference for admin edits
                 const skuListEl = document.getElementById('global-sku-list');
                 if (skuListEl) skuListEl.innerHTML = Object.keys(data.skus).map(k => `<option value="${k}">${data.skus[k].name}</option>`).join('');
                 
-                const masterSkuFilter = document.getElementById('master-filter-sku');
-                if(masterSkuFilter) masterSkuFilter.innerHTML = `<option value="ALL">All Products</option>` + Object.keys(data.skus).sort().map(k => `<option value="${k}">${k} - ${data.skus[k].name}</option>`).join('');
+                const masterSkuFilter = document.getElementById('master-sku-list');
+                if(masterSkuFilter) masterSkuFilter.innerHTML = Object.keys(data.skus).sort().map(k => `<option value="${k}">${data.skus[k].name}</option>`).join('');
                 
                 if(window.buildFastEncodingGrid) window.buildFastEncodingGrid();
             }
@@ -1019,10 +1087,12 @@ window.MASTER_DATA = data; // Save global reference for admin edits
                 const outletListEl = document.getElementById('global-outlet-list');
                 if(outletListEl) outletListEl.innerHTML = Object.keys(data.outlets).map(o => `<option value="${o}">`).join('');
                 
-                // NEW: Populate the Master Ledger Outlet Filter!
-                const masterStoreFilter = document.getElementById('master-filter-store');
-                if(masterStoreFilter) masterStoreFilter.innerHTML = `<option value="ALL">All Outlets</option>` + Object.keys(data.outlets).sort().map(o => `<option value="${o}">${o}</option>`).join('');
+                const masterStoreFilter = document.getElementById('master-store-list');
+                if(masterStoreFilter) masterStoreFilter.innerHTML = Object.keys(data.outlets).sort().map(o => `<option value="${o}">`).join('');
             }
+            
+            const masterRegionFilter = document.getElementById('master-filter-region');
+            if(masterRegionFilter && data.regions) masterRegionFilter.innerHTML = `<option value="ALL">All Regions</option>` + data.regions.map(r => `<option value="${r}">${r}</option>`).join('');
 if (window.renderAdminDirectories) window.renderAdminDirectories(data);
 
             const badgeIcon = document.querySelector('.bg-amber-400.animate-pulse');
@@ -1053,12 +1123,13 @@ if (window.renderAdminDirectories) window.renderAdminDirectories(data);
 
         if(window.OUTLET_DATA && window.OUTLET_DATA[outletName]) {
             const data = window.OUTLET_DATA[outletName];
-            textDisplay.innerHTML = `<span class="text-emerald-600">${data.region}</span> &bull; ${data.type}`;
+            textDisplay.innerHTML = `<span class="text-emerald-400">${data.region}</span> &bull; <span class="text-slate-200">${data.type}</span>`;
             textDisplay.classList.remove('italic', 'text-slate-400');
-            textDisplay.classList.add('text-slate-800');
+            textDisplay.classList.add('text-white'); // 🚨 CHANGED TO WHITE
             regionInput.value = data.region;
             typeInput.value = data.type;
-        } else {
+        } 
+	else {
             textDisplay.innerHTML = "Unknown Outlet (Requires Registration in Admin)";
             textDisplay.classList.remove('text-slate-800');
             textDisplay.classList.add('text-red-500', 'italic');
@@ -2024,21 +2095,35 @@ let invData = {};
 
   window.searchMasterLedger = function() {
       const queryText = document.getElementById('master-search-input').value.toLowerCase();
-      const filterStore = document.getElementById('master-filter-store') ? document.getElementById('master-filter-store').value : 'ALL';
-      const filterSku = document.getElementById('master-filter-sku') ? document.getElementById('master-filter-sku').value : 'ALL';
+      const filterStore = document.getElementById('master-filter-store') ? document.getElementById('master-filter-store').value.trim() : '';
+      const filterSku = document.getElementById('master-filter-sku') ? document.getElementById('master-filter-sku').value.trim() : '';
+      const filterRegion = document.getElementById('master-filter-region') ? document.getElementById('master-filter-region').value : 'ALL';
+      const filterType = document.getElementById('master-filter-type') ? document.getElementById('master-filter-type').value : 'ALL';
 
       window.MASTER_LEDGER_FILTERED = window.GLOBAL_TRANSACTIONS.filter(tx => {
-          // 1. Check Dropdowns First (Eliminates non-matches instantly)
-          // Check BOTH the origin store and the destination store!
-if (filterStore !== 'ALL' && tx.store !== filterStore && tx.dest_store !== filterStore) return false;
-          if (filterSku !== 'ALL' && tx.sku !== filterSku) return false;
+          // 1. Check Store
+          if (filterStore !== '' && tx.store !== filterStore && tx.dest_store !== filterStore) return false;
+          
+          // 2. Check SKU
+          if (filterSku !== '' && tx.sku !== filterSku) return false;
+          
+          // 3. Check Region (Must match origin region OR destination region)
+          if (filterRegion !== 'ALL') {
+              let matchesRegion = (tx.region === filterRegion);
+              let destRegion = window.OUTLET_DATA && window.OUTLET_DATA[tx.dest_store] ? window.OUTLET_DATA[tx.dest_store].region : null;
+              if (tx.dest_store && destRegion === filterRegion) matchesRegion = true;
+              if (!matchesRegion) return false;
+          }
 
-          // 2. Then check text search (for Dates, Remarks, DR#)
+          // 4. Check Type
+          if (filterType !== 'ALL' && tx.record_type !== filterType) return false;
+
+          // 5. Check Search Text
           const searchString = `${tx.sku} ${tx.store} ${tx.region} ${tx.timestamp} ${tx.type} ${tx.record_type} ${tx.remarks||''}`.toLowerCase();
           return searchString.includes(queryText);
       });
       
-      window.MASTER_LEDGER_PAGE = 1; // Reset to page 1 on new search
+      window.MASTER_LEDGER_PAGE = 1; 
       window.renderMasterLedgerPage();
   };
 
@@ -2150,7 +2235,12 @@ if (filterStore !== 'ALL' && tx.store !== filterStore && tx.dest_store !== filte
       const startD = document.getElementById('dash-start-date') ? document.getElementById('dash-start-date').value : "";
       const endD = document.getElementById('dash-end-date') ? document.getElementById('dash-end-date').value : "";
 
-      let regionSales = 0; let outletSales = 0; let consigSales = 0; let otherSales = 0; 
+let regionSales = 0; 
+      let typeSales = {}; // 🚨 NEW: Dynamic bucket for all business types
+      if (window.MASTER_DATA && window.MASTER_DATA.business_types) {
+          window.MASTER_DATA.business_types.forEach(t => typeSales[t] = 0);
+      }
+      
       let regionStores = [];
 
 // SMART GROUPING ENGINE:
@@ -2179,19 +2269,23 @@ if (filterStore !== 'ALL' && tx.store !== filterStore && tx.dest_store !== filte
       }
 
       window.GLOBAL_TRANSACTIONS.forEach(tx => {
-    if (tx.is_voided) return; // <--- PASTE IT EXACTLY HERE
-    
-    const txDate = tx.timestamp.substring(0, 10);
-    let isDateValid = (!startD || !endD) ? true : (txDate >= startD && txDate <= endD);
-    // ... rest of code
+          if (tx.is_voided) return; 
+          
+          const txDate = tx.timestamp.substring(0, 10);
+          let isDateValid = (!startD || !endD) ? true : (txDate >= startD && txDate <= endD);
           
           if (isTargetRegion(tx.region) && tx.record_type === 'SALE' && isDateValid) {
               const val = parseFloat(tx.val) || 0;
               regionSales += val;
-              const typeStr = tx.type ? tx.type.toLowerCase() : "";
-              if (typeStr.includes('consignment')) consigSales += val;
-              else if (typeStr.includes('outlet') || typeStr.includes('store')) outletSales += val;
-              else otherSales += val;
+              
+              // 🚨 THE BUG FIX: Check the LIVE database for the store's current type!
+              let typeStr = tx.type || "Uncategorized";
+              if (window.OUTLET_DATA && window.OUTLET_DATA[tx.store] && window.OUTLET_DATA[tx.store].type) {
+                  typeStr = window.OUTLET_DATA[tx.store].type;
+              }
+              
+              if(typeSales[typeStr] !== undefined) typeSales[typeStr] += val;
+              else typeSales[typeStr] = val; 
           }
 
           if (!endD || txDate <= endD) {
@@ -2216,14 +2310,35 @@ if (filterStore !== 'ALL' && tx.store !== filterStore && tx.dest_store !== filte
           }
       });
 
-      // Inject the new specific boxes! Added Asset Value!
-      document.getElementById('regional-metrics-container').innerHTML = `
-          <div class="px-3 py-2 bg-slate-50 rounded-lg border border-slate-100"><p class="text-[8px] font-black text-slate-400 uppercase tracking-widest">Outlets</p><h4 class="font-black text-sm text-slate-700">${regionStores.length}</h4></div>
-          <div class="px-3 py-2 bg-amber-50 rounded-lg border border-amber-100"><p class="text-[8px] font-black text-amber-600 uppercase tracking-widest">Current Stock Val</p><h4 class="font-black text-sm text-amber-700">₱${regionAssetValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4></div>
-          <div class="px-3 py-2 bg-emerald-50 rounded-lg border border-emerald-100"><p class="text-[8px] font-black text-emerald-600 uppercase tracking-widest">Gross Sales</p><h4 class="font-black text-sm text-emerald-700">₱${regionSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4></div>
-          <div class="px-3 py-2 bg-blue-50 rounded-lg border border-blue-100"><p class="text-[8px] font-black text-blue-600 uppercase tracking-widest">Outlets</p><h4 class="font-black text-sm text-blue-700">₱${outletSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4></div>
-          <div class="px-3 py-2 bg-purple-50 rounded-lg border border-purple-100"><p class="text-[8px] font-black text-purple-600 uppercase tracking-widest">Consignments</p><h4 class="font-black text-sm text-purple-700">₱${consigSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4></div>
+     // 🚨 DYNAMIC BOX BUILDER (Total Sales Removed)
+      let metricsHTML = `
+          <div class="px-4 py-2 bg-slate-50 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center justify-center min-w-[100px] shrink-0">
+              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Outlets</p>
+              <h4 class="font-black text-sm text-slate-700">${regionStores.length}</h4>
+          </div>
+          <div class="px-4 py-2 bg-amber-50 rounded-xl border border-amber-100 shadow-sm flex flex-col items-center justify-center min-w-[120px] shrink-0">
+              <p class="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-0.5">Stock Value</p>
+              <h4 class="font-black text-sm text-amber-700">₱${regionAssetValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
+          </div>
       `;
+
+      const colors = ['blue', 'purple', 'indigo', 'cyan', 'teal'];
+      let cIdx = 0;
+      Object.keys(typeSales).forEach(t => {
+          // Only show boxes for active business types that exist in the system
+          if (typeSales[t] > 0 || (window.MASTER_DATA && window.MASTER_DATA.business_types.includes(t))) {
+              const c = colors[cIdx % colors.length];
+              metricsHTML += `
+              <div class="px-4 py-2 bg-${c}-50 rounded-xl border border-${c}-100 shadow-sm flex flex-col items-center justify-center min-w-[120px] shrink-0">
+                  <p class="text-[9px] font-black text-${c}-600 uppercase tracking-widest mb-0.5">${t}</p>
+                  <h4 class="font-black text-sm text-${c}-700">₱${typeSales[t].toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
+              </div>
+              `;
+              cIdx++;
+          }
+      });
+
+      document.getElementById('regional-metrics-container').innerHTML = metricsHTML;
 
       // --- NEW: UPGRADED SMART QUOTA TRACKER WIDGET ---
       let targetDiv = document.getElementById('regional-quota-tracker');
@@ -3419,6 +3534,9 @@ window.renderAdminDirectories = function(data) {
  window.renderQuotaList = function() {
       const listContainer = document.getElementById('admin-quotas-list');
       const viewMonth = document.getElementById('admin-quota-view-month').value;
+      const searchInput = document.getElementById('quota-search-input');
+      const query = searchInput ? searchInput.value.toLowerCase() : '';
+      
       if(!listContainer || !window.MASTER_DATA) return;
       
       const quotasObj = (window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[viewMonth]) ? window.MASTER_DATA.quotas[viewMonth] : {};
@@ -3427,19 +3545,45 @@ window.renderAdminDirectories = function(data) {
           listContainer.innerHTML = `<div class="col-span-full text-center py-6 bg-slate-50 rounded-xl border border-slate-200 border-dashed"><p class="text-xs font-bold text-slate-400 italic">No targets set for ${viewMonth}.</p></div>`;
           return;
       }
+
+      // Group and Filter Array
+      let filteredKeys = Object.keys(quotasObj).filter(k => k.toLowerCase().includes(query));
+      if (filteredKeys.length === 0) {
+          listContainer.innerHTML = `<div class="col-span-full text-center py-6 bg-slate-50 rounded-xl border border-slate-200 border-dashed"><p class="text-xs font-bold text-slate-400 italic">No targets match your search.</p></div>`;
+          return;
+      }
+
+      // Smart Sorting: Global -> Regions -> Outlets
+      filteredKeys.sort((a,b) => {
+          if (a === 'GLOBAL') return -1; if (b === 'GLOBAL') return 1;
+          const isRegA = window.MASTER_DATA.regions && window.MASTER_DATA.regions.includes(a);
+          const isRegB = window.MASTER_DATA.regions && window.MASTER_DATA.regions.includes(b);
+          if (isRegA && !isRegB) return -1;
+          if (!isRegA && isRegB) return 1;
+          return a.localeCompare(b);
+      });
       
-      listContainer.innerHTML = Object.keys(quotasObj).sort((a,b) => a === 'GLOBAL' ? -1 : 1).map(r => `
-          <div class="${r === 'GLOBAL' ? 'bg-emerald-50 border-emerald-200 col-span-full' : 'bg-white border-slate-200'} p-4 rounded-xl border flex justify-between items-center group shadow-sm transition-all hover:shadow-md hover:border-amber-400">
-              <div class="truncate pr-4">
-                  <p class="text-[9px] font-black ${r === 'GLOBAL' ? 'text-emerald-500' : 'text-slate-400'} uppercase tracking-widest truncate">${r === 'GLOBAL' ? '<i class="fa-solid fa-crown mr-1"></i> NATIONWIDE TARGET' : r}</p>
-                  <p class="font-black ${r === 'GLOBAL' ? 'text-emerald-700 text-xl' : 'text-slate-700 text-lg'} mt-0.5 tracking-tight">₱${parseFloat(quotasObj[r]).toLocaleString(undefined, {minimumFractionDigits:2})}</p>
+      listContainer.innerHTML = filteredKeys.map(r => {
+          const isGlobal = (r === 'GLOBAL');
+          const isRegion = window.MASTER_DATA.regions && window.MASTER_DATA.regions.includes(r);
+          
+          let tagHTML = `<span class="text-[8px] font-bold text-blue-400 border border-blue-200 bg-blue-50 px-1 rounded inline-block ml-1">OUTLET</span>`;
+          if (isGlobal) tagHTML = `<span class="text-[8px] font-bold text-emerald-600 border border-emerald-300 bg-emerald-100 px-1 rounded inline-block ml-1"><i class="fa-solid fa-crown text-[8px]"></i></span>`;
+          else if (isRegion) tagHTML = `<span class="text-[8px] font-bold text-purple-500 border border-purple-200 bg-purple-50 px-1 rounded inline-block ml-1">REGION</span>`;
+
+          return `
+          <div class="${isGlobal ? 'bg-emerald-50 border-emerald-200 col-span-full md:col-span-2' : 'bg-white border-slate-200'} p-4 rounded-xl border flex justify-between items-center group shadow-sm transition-all hover:shadow-md hover:border-amber-400">
+              <div class="truncate pr-4 w-full">
+                  <div class="flex items-center gap-1 w-full"><p class="text-[9px] font-black ${isGlobal ? 'text-emerald-500' : 'text-slate-400'} uppercase tracking-widest truncate">${isGlobal ? 'NATIONWIDE TARGET' : r}</p> ${tagHTML}</div>
+                  <p class="font-black ${isGlobal ? 'text-emerald-700 text-xl' : 'text-slate-700 text-lg'} mt-0.5 tracking-tight">₱${parseFloat(quotasObj[r]).toLocaleString(undefined, {minimumFractionDigits:2})}</p>
               </div>
               <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 shrink-0">
-                  <button type="button" onclick="document.getElementById('quota-month').value='${viewMonth}'; document.getElementById('quota-target-input').value='${r.replace(/'/g, "\\'")}'; document.getElementById('quota-amount').value='${quotasObj[r]}'; document.getElementById('quota-amount').focus();" class="w-8 h-8 rounded-full bg-white text-blue-500 shadow border border-blue-100 hover:bg-blue-500 hover:text-white transition-colors flex items-center justify-center"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                  <button type="button" onclick="document.getElementById('quota-month').value='${viewMonth}'; document.getElementById('quota-target-input').value='${r.replace(/'/g, "\\'")}'; document.getElementById('quota-amount').value='${quotasObj[r]}'; document.getElementById('quota-amount').focus(); window.scrollTo(0,0);" class="w-8 h-8 rounded-full bg-white text-blue-500 shadow border border-blue-100 hover:bg-blue-500 hover:text-white transition-colors flex items-center justify-center"><i class="fa-solid fa-pen text-[10px]"></i></button>
                   <button type="button" onclick="window.deleteAdminItem('quota', '${r.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-full bg-white text-red-500 shadow border border-red-100 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center"><i class="fa-solid fa-trash text-[10px]"></i></button>
               </div>
           </div>
-      `).join('');
+          `;
+      }).join('');
   };
  // NEW: Search Hub Outlets Engine
   window.searchHubOutlets = function() {
