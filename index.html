@@ -1047,15 +1047,44 @@ window.trackFirebaseRead(1); // Track the settings document read
 window.MASTER_DATA = data; // Save global reference for admin edits
             
            
+            // 🚨 NEW: Secure Role-Based Region Filter
+            let allowedRegions = data.regions || [];
+            if (window.CURRENT_USER && (window.CURRENT_USER.role === "Regional Supervisor" || window.CURRENT_USER.role === "Regional Manager")) {
+                const uReg = window.CURRENT_USER.region.toLowerCase();
+                if (uReg === "visayas") {
+                    allowedRegions = allowedRegions.filter(r => ['visayas', 'cebu', 'iloilo', 'tacloban'].includes(r.toLowerCase()));
+                } else {
+                    allowedRegions = allowedRegions.filter(r => r.toLowerCase() === uReg);
+                    // Failsafe if case formatting is mismatched
+                    if (allowedRegions.length === 0 && window.CURRENT_USER.region) allowedRegions = [window.CURRENT_USER.region];
+                }
+            }
+
             // Populate Regions
-            if (data.regions && Array.isArray(data.regions)) {
-                const regionOptions = data.regions.map(r => `<option value="${r}">${r}</option>`).join('');
+            if (allowedRegions.length > 0) {
+                const regionOptions = allowedRegions.map(r => `<option value="${r}">${r}</option>`).join('');
+                
                 const adminRegion = document.getElementById('new-outlet-region');
                 if(adminRegion) adminRegion.innerHTML = `<option value="" disabled selected>Select Region...</option>` + regionOptions;
+                
                 const drilldownSelect = document.getElementById('drilldown-region-select');
-                if(drilldownSelect) drilldownSelect.innerHTML = regionOptions;
+                if(drilldownSelect) {
+                    drilldownSelect.innerHTML = regionOptions;
+                    if(allowedRegions.length === 1) drilldownSelect.disabled = true; // Lock dropdown if only 1 option
+                }
+                
                 const userRegion = document.getElementById('new-user-region');
                 if(userRegion) userRegion.innerHTML = `<option value="ALL">ALL REGIONS (Global)</option>` + regionOptions;
+                
+                // Secure the Master Ledger dropdown as well!
+                const masterRegionFilter = document.getElementById('master-filter-region');
+                if(masterRegionFilter) {
+                    if (window.CURRENT_USER && (window.CURRENT_USER.role === "Regional Supervisor" || window.CURRENT_USER.role === "Regional Manager")) {
+                        masterRegionFilter.innerHTML = regionOptions; 
+                    } else {
+                        masterRegionFilter.innerHTML = `<option value="ALL">All Regions</option>` + regionOptions;
+                    }
+                }
             }
 	// Populate Business Types
             if (data.business_types && Array.isArray(data.business_types)) {
@@ -1091,8 +1120,7 @@ window.MASTER_DATA = data; // Save global reference for admin edits
                 if(masterStoreFilter) masterStoreFilter.innerHTML = Object.keys(data.outlets).sort().map(o => `<option value="${o}">`).join('');
             }
             
-            const masterRegionFilter = document.getElementById('master-filter-region');
-            if(masterRegionFilter && data.regions) masterRegionFilter.innerHTML = `<option value="ALL">All Regions</option>` + data.regions.map(r => `<option value="${r}">${r}</option>`).join('');
+            // (Removed redundant masterRegionFilter logic - handled securely above)
 if (window.renderAdminDirectories) window.renderAdminDirectories(data);
 
             const badgeIcon = document.querySelector('.bg-amber-400.animate-pulse');
@@ -3240,42 +3268,7 @@ function applyRoleRestrictions() {
           document.getElementById('nav-head-intel').style.display = 'none';
           document.getElementById('nav-head-ops').style.display = 'none';
           
-          setTimeout(() => {
-              if (region.toLowerCase() === "visayas") {
-                  // THE VISAYAS MASTER FOLDER LOGIC
-                  regSelect.disabled = false;
-                  
-                  Array.from(regSelect.options).forEach(opt => {
-                      const val = opt.value.toLowerCase();
-                      // Only allow Visayas, Cebu, Iloilo, and Tacloban to exist in the dropdown
-                      if(val !== 'visayas' && val !== 'cebu' && val !== 'iloilo' && val !== 'tacloban' && val !== '') {
-                          opt.style.display = 'none';
-                          opt.disabled = true; 
-                      } else {
-                          opt.style.display = '';
-                          opt.disabled = false;
-                      }
-                  });
-                  
-                  // Force the dropdown to start on the Visayas Summary!
-                  regSelect.value = "Visayas";
-                  window.renderRegionalDrilldown();
-                  
-              } else {
-                  // STANDARD REGIONAL LOCK (Locks standard managers to their 1 specific region)
-                  regSelect.value = region;
-                  regSelect.disabled = true;
-                  
-                  // Failsafe: If the dropdown didn't render fast enough, force the option
-                  if(regSelect.value !== region) {
-                      regSelect.innerHTML += `<option value="${region}">${region}</option>`;
-                      regSelect.value = region;
-                  }
-                  
-                  window.renderRegionalDrilldown();
-              }
-          }, 1500); 
-
+          // Secure dropdown populating is now handled instantly inside loadMasterSettings!
           window.showTab('regions', document.getElementById('nav-regions'));
       }
       // 5. GLOBAL ACCESS ROLES
