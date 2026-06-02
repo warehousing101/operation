@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KVW Command Center | Enterprise IMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -52,12 +52,12 @@
     <div id="login-screen" class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black">
         <div class="p-10 max-w-md w-full bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-3xl text-center">
             
-            <div class="w-24 h-24 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-6 border border-emerald-300/50">
-                <i class="fa-solid fa-leaf text-5xl text-white"></i>
+            <div class="w-24 h-24 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-6 border border-slate-700/50 overflow-hidden bg-white">
+                <img src="assets/logo.jpg" alt="Company Logo" class="w-full h-full object-cover">
             </div>
             
-            <h2 class="text-3xl font-black text-white tracking-tight mb-1">KIND VENTURES</h2>
-            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-8">Enterprise Command Center</p>
+            <h2 class="text-3xl font-black text-white tracking-tight mb-1">KIND WELLNESS VENTURES INC</h2>
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-8">INVENTORY MANAGEMENT SYSTEM</p>
 
             <form onsubmit="event.preventDefault(); if(window.loginUser) window.loginUser(event);" class="space-y-4 text-left">
                 <div>
@@ -104,12 +104,12 @@
     <aside id="mobile-sidebar" class="sidebar-container text-white flex flex-col shadow-2xl shrink-0 z-[60] absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out">
         <div class="p-8 mb-2">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center border border-white/30 backdrop-blur-md">
-                    <i class="fa-solid fa-leaf text-xl text-emerald-300"></i>
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center border border-white/30 backdrop-blur-md overflow-hidden bg-white">
+                    <img src="assets/logo.jpg" alt="Company Logo" class="w-full h-full object-cover">
                 </div>
                 <div>
-                    <h1 class="font-extrabold text-lg tracking-tight">KIND VENTURES</h1>
-                    <p class="text-[9px] text-emerald-300/80 font-black uppercase tracking-[0.1em]">Retail & IMS Core</p>
+                    <h1 class="font-extrabold text-lg tracking-tight">Kind Wellness</h1>
+                    <p class="text-[9px] text-emerald-300/80 font-black uppercase tracking-[0.1em]">Ventures Inc.</p>
                 </div>
             </div>
         </div>
@@ -158,34 +158,7 @@
             <p class="text-[10px] text-white/60">System pending data sync</p>
         </div>
 
-        <div class="mx-6 mb-6 p-4 bg-black/20 rounded-xl border border-white/10 space-y-4 shadow-inner">
-            <h4 class="text-[9px] font-black uppercase text-slate-400 tracking-widest border-b border-white/10 pb-2 flex items-center gap-2"><i class="fa-solid fa-server text-blue-400"></i> Firebase Spark Plan</h4>
-            
-            <div>
-                <div class="flex justify-between items-end mb-1">
-                    <span class="text-[9px] font-bold uppercase text-blue-300 tracking-widest">Est. Reads</span>
-                    <span class="text-[10px] font-black text-white"><span id="read-counter">0</span><span class="text-white/40"> / 50k</span></span>
-                </div>
-                <div class="w-full bg-white/10 rounded-full h-1"><div id="read-bar" class="bg-blue-400 h-1 rounded-full transition-all" style="width: 0%"></div></div>
-            </div>
-
-            <div class="space-y-2 border-t border-white/5 pt-3">
-                <div class="flex justify-between items-center text-[9px] font-bold text-white/60">
-                    <span class="uppercase tracking-widest">Daily Writes</span>
-                    <span>Max <span class="text-emerald-400">20,000</span></span>
-                </div>
-                <div class="flex justify-between items-center text-[9px] font-bold text-white/60">
-                    <span class="uppercase tracking-widest">Daily Deletes</span>
-                    <span>Max <span class="text-red-400">20,000</span></span>
-                </div>
-                <div class="flex justify-between items-center text-[9px] font-bold text-white/60">
-                    <span class="uppercase tracking-widest">Storage</span>
-                    <span>Max <span class="text-amber-400">1.0 GB</span></span>
-                </div>
-            </div>
-            
-            <p class="text-[7px] text-white/30 text-center leading-tight pt-2">For exact live billing, check Firebase Console</p>
-        </div>
+      
     </aside>
 
     <main class="flex-1 flex flex-col min-w-0 relative">
@@ -197,33 +170,36 @@
                 </button>
                 <h2 id="view-title" class="text-xl md:text-2xl font-black text-slate-800 tracking-tight truncate max-w-[180px] md:max-w-none">Executive Dashboard</h2>
             </div>
-            <div class="flex items-center gap-6">
-                
-                <div class="flex items-center gap-3 border-r border-slate-200 pr-6 hidden cursor-pointer hover:opacity-70 transition-opacity" id="header-user-profile" onclick="window.promptLogout()" title="Click to Logout">
-                    <div class="text-right hidden md:block">
-                        <p id="head-user-name" class="text-sm font-black text-slate-800 leading-tight">Name</p>
-                        <p id="head-user-role" class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Role &bull; Region</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md border-2 border-emerald-500">
-                        <i class="fa-solid fa-user-tie text-sm"></i>
-                    </div>
-                </div>
+            <div class="flex items-center gap-2 md:gap-6">
+    
+    <div class="flex items-center gap-3 border-r border-slate-200 pr-6 hidden cursor-pointer hover:opacity-70 transition-opacity" id="header-user-profile" onclick="window.promptLogout()" title="Click to Logout">
+        <div class="text-right hidden md:block">
+            <p id="head-user-name" class="text-sm font-black text-slate-800 leading-tight">Name</p>
+            <p id="head-user-role" class="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Role &bull; Region</p>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center shadow-md border-2 border-emerald-500">
+            <i class="fa-solid fa-user-tie text-sm"></i>
+        </div>
+    </div>
 
-                <div class="bg-slate-50 border border-slate-200 rounded-lg flex items-center px-3 py-1.5 shadow-inner">
-                    <i class="fa-solid fa-calendar-days text-blue-600 ml-2 mr-3 text-sm"></i>
-                    <input type="month" id="global-month-filter" onchange="window.syncGlobalMonth()" onclick="this.showPicker()" class="bg-transparent border-none outline-none font-black text-slate-700 text-sm cursor-pointer">
-                </div>
-                <button onclick="exportToCSV()" class="px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-lg hover:bg-emerald-600 transition-colors shadow-sm">
-                    <i class="fa-solid fa-file-csv mr-1"></i> Export Data
-                </button>
-            </div>
+    <div class="bg-slate-50 border border-slate-200 rounded-lg flex items-center px-2 py-1.5 md:px-3 shadow-inner">
+        <i class="fa-solid fa-calendar-days text-blue-600 ml-1 mr-2 md:ml-2 md:mr-3 text-sm"></i>
+        <input type="month" id="global-month-filter" onchange="window.syncGlobalMonth()" onclick="this.showPicker()" class="bg-transparent border-none outline-none font-black text-slate-700 text-xs md:text-sm cursor-pointer w-32 md:w-auto">
+    </div>
+    
+    <button onclick="exportToCSV()" class="px-3 md:px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-lg hover:bg-emerald-600 transition-colors shadow-sm">
+        <i class="fa-solid fa-file-csv md:mr-1"></i> <span class="hidden md:inline">Export Data</span>
+    </button>
+    
+</div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+        <div class="flex-1 overflow-y-auto p-3 md:p-8 custom-scrollbar">
             
-            <section id="dash" class="tab-content active space-y-6">
 
+<section id="dash" class="tab-content active space-y-6">
 
+               <!-- 1. TOP METRIC CARDS -->
                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="glass-card p-6 border-l-4 border-emerald-500 relative overflow-hidden">
                         <i class="fa-solid fa-money-bill-trend-up absolute -right-4 -bottom-4 text-6xl text-emerald-500/10"></i>
@@ -245,6 +221,22 @@
                     </div>
                 </div>
 
+                <!-- 2. NATIONAL SALES REPORT (Injected here via JS) -->
+                <div id="national-sales-report" class="w-full"></div>
+
+                <!-- 3. CHARTS: TRAJECTORY & DISTRIBUTION (Moved up!) -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 glass-card p-6">
+                        <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4">Revenue Trajectory (Daily Progress)</h4>
+                        <div class="h-[250px] relative w-full"><canvas id="chart-revenue"></canvas></div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4">Territory Sales Distribution</h4>
+                        <div class="h-[250px] relative w-full flex justify-center"><canvas id="chart-region"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- 4. TODAY'S LIVE PERFORMANCE -->
                 <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4 mt-8"><i class="fa-solid fa-bolt text-amber-500 mr-2"></i> Today's Live Performance (<span id="dash-today-label">Today</span>)</h4>
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="glass-card p-6 lg:col-span-2 border-t-4 border-blue-500">
@@ -268,6 +260,7 @@
                     </div>
                 </div>
 
+                <!-- 5. SPECIFIC DATE ANALYZER -->
                 <div class="glass-card p-6 bg-slate-800 text-white flex flex-col md:flex-row items-center justify-between gap-6 border border-slate-700 shadow-lg">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-xl bg-slate-700 flex items-center justify-center text-blue-400 text-xl"><i class="fa-solid fa-calendar-check"></i></div>
@@ -285,17 +278,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 glass-card p-6">
-                        <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4">Revenue Trajectory (Daily Progress)</h4>
-                        <div class="h-[250px] relative w-full"><canvas id="chart-revenue"></canvas></div>
-                    </div>
-                    <div class="glass-card p-6">
-                        <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4">Territory Sales Distribution</h4>
-                        <div class="h-[250px] relative w-full flex justify-center"><canvas id="chart-region"></canvas></div>
-                    </div>
-                </div>
-
+                <!-- 6. TOP PRODUCTS & EXECUTIVE INSIGHTS -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 glass-card p-6">
                         <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4">Top Performing Products (Volume)</h4>
@@ -311,15 +294,34 @@
             </section>
 
             <section id="analytics" class="tab-content space-y-6">
-                <div class="glass-card p-8 flex justify-between items-center bg-slate-50 border border-slate-200">
-                    <div>
-                        <h3 class="text-2xl font-black text-slate-800 tracking-tight">Performance Matrix</h3>
-                        <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Territory Evaluation</p>
-                    </div>
-                    <select id="rank-type-filter" onchange="renderPerformanceMatrix()" class="form-input w-auto font-black text-[10px] uppercase tracking-widest py-3">
-                        <option value="ALL">All Business Types</option>
-                        </select>
-                </div>
+                <div class="glass-card p-8 flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-50 border border-slate-200 gap-4 mb-6">
+    <div>
+        <h3 class="text-2xl font-black text-slate-800 tracking-tight">Performance Matrix</h3>
+        <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">Territory Evaluation</p>
+    </div>
+    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-end">
+         
+         <div class="flex flex-col">
+             <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Tier 1 (Heavy) Min ₱</label>
+             <input type="number" id="tier1-min" value="500000" onchange="renderPerformanceMatrix()" class="form-input py-2 w-28 text-xs border-emerald-300 bg-emerald-50 text-emerald-800 shadow-inner">
+         </div>
+         <div class="flex flex-col">
+             <label class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Tier 2 (Mid) Min ₱</label>
+             <input type="number" id="tier2-min" value="150000" onchange="renderPerformanceMatrix()" class="form-input py-2 w-28 text-xs border-blue-300 bg-blue-50 text-blue-800 shadow-inner">
+         </div>
+
+        <select id="rank-tier-filter" onchange="renderPerformanceMatrix()" class="form-input w-full sm:w-auto font-black text-[10px] uppercase tracking-widest py-3 shadow-sm cursor-pointer">
+            <option value="ALL">All Quota Tiers (Overall)</option>
+            <option value="TIER1">Tier 1: Heavyweight</option>
+            <option value="TIER2">Tier 2: Middleweight</option>
+            <option value="TIER3">Tier 3: Lightweight</option>
+            <option value="NO_QUOTA">Uncategorized (No Quota)</option>
+        </select>
+        <select id="rank-type-filter" onchange="renderPerformanceMatrix()" class="form-input w-full sm:w-auto font-black text-[10px] uppercase tracking-widest py-3 shadow-sm cursor-pointer">
+            <option value="ALL">All Business Types</option>
+        </select>
+    </div>
+</div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="glass-card p-6">
@@ -373,7 +375,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div class="lg:col-span-1 glass-card p-4 h-[750px] flex flex-col">
+                    <div class="lg:col-span-1 glass-card p-4 h-[350px] lg:h-[750px] flex flex-col">
                         <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4 px-2">Registered Outlets</h4>
                         
                         <div class="relative mb-4 px-2">
@@ -614,7 +616,6 @@
                     </div>
                 </div>
             </section>
-            </section>
 <section id="inventory" class="tab-content space-y-6">
                 <div class="glass-card overflow-hidden">
                     <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -639,8 +640,10 @@
                                 <tr>
                                     <th class="px-6 py-4">SKU / Product</th>
                                     <th class="px-6 py-4 text-center">Unit Price</th>
-                                    <th class="px-6 py-4 text-center text-emerald-500">Global IN</th>
-                                    <th class="px-6 py-4 text-center text-blue-500">Global OUT (Sold+BO)</th>
+                                    <th class="px-6 py-4 text-center text-slate-500">Beg. Inv</th>
+                                    <th class="px-6 py-4 text-center text-emerald-500">Global IN (Deliveries)</th>
+                                    <th class="px-6 py-4 text-center text-blue-500">Sold</th>
+                                    <th class="px-6 py-4 text-center text-orange-500">B.O. (Disp)</th>
                                     <th class="px-6 py-4 text-center text-slate-800">Net Physical Stock</th>
                                     <th class="px-6 py-4 text-right">Total Asset Value</th>
                                 </tr>
@@ -675,10 +678,10 @@
                     <div class="overflow-x-auto custom-scrollbar h-[600px]">
                         <table class="w-full text-left relative">
                             <thead class="bg-slate-50 text-[10px] font-black uppercase text-slate-400 border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-                                <tr>
-                                    <th class="px-6 py-4">Exact Timestamp</th>
-                                    <th class="px-6 py-4">Location Context</th>
-                                    <th class="px-6 py-4">Product SKU</th>
+    <tr>
+        <th class="px-6 py-4">Exact Timestamp</th>
+        <th class="px-6 py-4">Location Context</th>
+        <th class="px-6 py-4 text-blue-500">Personnel & Details</th> <th class="px-6 py-4">Product SKU</th>
                                     <th class="px-6 py-4 text-center">Qty</th>
                                     <th class="px-6 py-4 text-right">Gross Value (₱)</th>
                                     <th class="px-6 py-4 text-center">Audit Status</th>
@@ -686,8 +689,8 @@
                                 </tr>
                             </thead>
                             <tbody id="master-ledger-body" class="divide-y divide-slate-100 text-sm">
-                                <tr><td colspan="7" class="px-10 py-10 text-center text-slate-400 font-bold uppercase text-[10px] italic">Loading entire database...</td></tr>
-                            </tbody>
+    <tr><td colspan="8" class="px-10 py-10 text-center text-slate-400 font-bold uppercase text-[10px] italic">Loading entire database...</td></tr>
+</tbody>
                         </table>
                     </div>
                     <div class="p-4 border-t border-slate-200 flex justify-between items-center bg-slate-50">
@@ -762,6 +765,7 @@
         </div>
     </div>
 
+    <!-- MODULE 1: ACCOUNTS -->
     <div id="config-mod-view-users" class="config-module-content space-y-6">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-t-4 border-indigo-600">
             <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-4"><i class="fa-solid fa-user-plus text-indigo-600 mr-2"></i> Register System User</h4>
@@ -796,6 +800,7 @@
         </div>
     </div>
 
+    <!-- MODULE 2: PRODUCTS -->
     <div id="config-mod-view-skus" class="config-module-content space-y-6 hidden">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-t-4 border-blue-600">
             <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-4"><i class="fa-solid fa-box text-blue-600 mr-2"></i> Publish Master SKU</h4>
@@ -825,16 +830,18 @@
         </div>
     </div>
 
+<!-- MODULE 3: TERRITORY -->
     <div id="config-mod-view-territory" class="config-module-content space-y-6 hidden">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-t-4 border-emerald-600">
-            <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-4"><i class="fa-solid fa-store text-amber-600 mr-2"></i> Register New Outlet</h4>
+            <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-4"><i class="fa-solid fa-store text-emerald-600 mr-2"></i> Register New Outlet</h4>
             <form onsubmit="addOutlet(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div class="md:col-span-2"><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Outlet Name</label><input type="text" id="new-outlet-name" class="form-input" placeholder="e.g., SM Megamall" required></div>
                 <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Region</label><select id="new-outlet-region" class="form-input" required></select></div>
                 <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Business Type</label><select id="new-outlet-type" class="form-input" required></select></div>
-                <div class="md:col-span-4"><button type="submit" class="w-full py-4 bg-amber-500 text-white font-black rounded-xl text-xs shadow-md hover:bg-amber-600 uppercase tracking-widest">Register Outlet</button></div>
+                <div class="md:col-span-4"><button type="submit" class="w-full py-4 bg-emerald-600 text-white font-black rounded-xl text-xs shadow-md hover:bg-emerald-700 uppercase tracking-widest">Register Outlet</button></div>
             </form>
         </div>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[350px]">
                 <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-3"><i class="fa-solid fa-map text-emerald-600 mr-2"></i> Regions Hub</h4>
@@ -851,17 +858,44 @@
                 </div>
             </div>
         </div>
+        
         <div class="glass-card overflow-hidden border border-slate-200 shadow-sm">
             <div class="p-4 bg-slate-800 text-white flex justify-between items-center"><h4 class="font-black tracking-widest uppercase text-xs"><i class="fa-solid fa-store mr-2 text-emerald-400"></i> Outlets</h4></div>
             <div class="overflow-y-auto custom-scrollbar h-[350px]">
                 <table class="w-full text-left text-xs"><thead class="bg-slate-50 text-[9px] font-black uppercase text-slate-500 sticky top-0 shadow-sm"><tr><th class="px-4 py-3">Outlet Name</th><th class="px-4 py-3">Region / Type</th><th class="px-4 py-3 text-center">Action</th></tr></thead><tbody id="admin-outlets-tbody" class="divide-y divide-slate-100"></tbody></table>
             </div>
         </div>
+
+        <!-- UPGRADED SMART QUOTA CONTROL -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-t-4 border-amber-500 mt-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-slate-100 pb-4 gap-4">
+                <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs"><i class="fa-solid fa-bullseye text-amber-600 mr-2"></i> Monthly Target Quotas</h4>
+                <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest pl-2">Viewing Targets For:</span>
+                    <input type="month" id="admin-quota-view-month" onchange="window.renderQuotaList()" class="bg-white border border-slate-200 text-slate-800 font-black text-xs py-1.5 px-3 rounded-lg outline-none cursor-pointer">
+                </div>
+            </div>
+            
+            <form onsubmit="setTargetQuota(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-amber-50/30 p-4 rounded-xl border border-amber-100/50">
+                <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Target Month</label><input type="month" id="quota-month" class="form-input bg-white cursor-pointer" required></div>
+                <div class="relative">
+    <label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Search/Select Target</label>
+    <input list="quota-target-list" id="quota-target-input" class="form-input bg-white placeholder:text-slate-300" placeholder="Type to search..." autocomplete="off" required>
+    <datalist id="quota-target-list"></datalist>
+</div>
+                <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Monthly Quota (₱)</label><input type="number" id="quota-amount" step="0.01" class="form-input bg-white" placeholder="e.g. 2500000" required></div>
+                <div><button type="submit" class="w-full py-4 bg-amber-500 text-white font-black rounded-xl text-xs shadow-md hover:bg-amber-600 uppercase tracking-widest transition-transform active:scale-95">Save Target</button></div>
+            </form>
+            
+            <div id="admin-quotas-list" class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3 pt-2">
+                <p class="text-xs text-slate-400 italic col-span-full">Loading quotas...</p>
+            </div>
+        </div>
     </div>
 </section>
 
         </div>
-    </main>
+    </main>	
                     
 
 <script type="module">
@@ -923,6 +957,15 @@
 
   window.SKU_DATA = {};
   window.OUTLET_DATA = {};
+
+  // --- REGION AGGREGATION ENGINE ---
+  // Automatically groups specific sub-regions into master territories
+  window.normalizeRegion = function(r) {
+      if (!r) return "Unknown";
+      const low = r.toLowerCase();
+      if (low === 'cebu' || low === 'iloilo' || low === 'tacloban' || low === 'visayas') return 'Visayas';
+      return r;
+  };
 
   // --- READ ENGINE (Loads your settings) ---
   window.loadMasterSettings = async function() {
@@ -1305,7 +1348,7 @@ window.buildFastEncodingGrid = function() {
       }
   };
 
-  window.addOutlet = async function(e) {
+window.addOutlet = async function(e) {
       e.preventDefault();
       const btn = e.target.querySelector('button');
       const outletName = document.getElementById('new-outlet-name').value;
@@ -1316,7 +1359,7 @@ window.buildFastEncodingGrid = function() {
           const masterRef = doc(db, "system_settings", "master");
           const docSnap = await getDoc(masterRef);
           let currentOutlets = docSnap.exists() ? docSnap.data().outlets || {} : {};
-          currentOutlets[outletName] = { region: region, type: type };
+          currentOutlets[outletName] = { region: region, type: type }; 
           await updateDoc(masterRef, { outlets: currentOutlets });
           window.showToast(`${outletName} securely registered!`, "success"); e.target.reset(); window.loadMasterSettings();
       } catch (error) { window.showToast("Error registering outlet.", "error"); } finally { btn.innerHTML = origText; }
@@ -1331,6 +1374,53 @@ window.buildFastEncodingGrid = function() {
           await updateDoc(doc(db, "system_settings", "master"), { business_types: arrayUnion(typeName) });
           window.showToast(`${typeName} added to Business Types!`, "success"); e.target.reset(); window.loadMasterSettings();
       } catch (error) { window.showToast("Error saving type.", "error"); } finally { btn.innerHTML = origText; }
+  };
+
+  // NEW: Save Time-Specific Quotas (Global, Regional, AND Outlets)
+ window.setTargetQuota = async function(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      const month = document.getElementById('quota-month').value;
+      const targetInput = document.getElementById('quota-target-input').value.trim();
+      const amount = parseFloat(document.getElementById('quota-amount').value);
+      const origText = btn.innerHTML; btn.innerHTML = `Updating...`;
+      
+      try {
+          const masterRef = doc(db, "system_settings", "master");
+          const docSnap = await getDoc(masterRef);
+          let currentQuotas = docSnap.exists() ? docSnap.data().quotas || {} : {};
+          
+          if (!currentQuotas[month]) currentQuotas[month] = {};
+          
+          // 🚨 BULK ASSIGNMENT ENGINE
+          if (targetInput.startsWith('TYPE: ')) {
+              const typeName = targetInput.replace('TYPE: ', '');
+              let count = 0;
+              Object.keys(window.OUTLET_DATA).forEach(store => {
+                  if (window.OUTLET_DATA[store].type === typeName) {
+                      currentQuotas[month][store] = amount;
+                      count++;
+                  }
+              });
+              window.showToast(`Applied ₱${amount.toLocaleString()} target to ${count} ${typeName} outlets!`, "success");
+          } 
+          else if (targetInput.startsWith('REGION: ')) {
+              const regName = targetInput.replace('REGION: ', '');
+              currentQuotas[month][regName] = amount;
+              window.showToast(`Regional target for ${regName} updated!`, "success");
+          } 
+          else {
+              currentQuotas[month][targetInput] = amount;
+              window.showToast(`${targetInput} target for ${month} updated!`, "success");
+          }
+          
+          await updateDoc(masterRef, { quotas: currentQuotas });
+          
+          document.getElementById('admin-quota-view-month').value = month;
+          document.getElementById('quota-amount').value = ''; 
+          document.getElementById('quota-target-input').value = '';
+          window.loadMasterSettings();
+      } catch (error) { window.showToast("Error saving quota.", "error"); } finally { btn.innerHTML = origText; }
   };
 
   // --- REAL-TIME LEDGER & SEARCH ENGINE ---
@@ -1401,7 +1491,7 @@ window.buildFastEncodingGrid = function() {
           // ENTER STANDALONE
           sidebar.classList.add('hidden');
           header.classList.add('hidden');
-          main.className = 'fixed inset-0 z-[100] bg-slate-50 overflow-y-auto custom-scrollbar p-8';
+          main.className = 'fixed inset-0 z-[100] bg-slate-50 overflow-y-auto custom-scrollbar p-3 md:p-8';
           btn.innerHTML = '<i class="fa-solid fa-compress"></i> Exit Standalone Mode';
           btn.classList.replace('bg-slate-900', 'bg-red-600');
           btn.classList.replace('hover:bg-emerald-600', 'hover:bg-red-700');
@@ -1467,6 +1557,9 @@ window.syncGlobalMonth = async function() {
       if(window.GLOBAL_TRANSACTIONS) {
 
                       window.GLOBAL_TRANSACTIONS.forEach(tx => {
+
+			if (tx.is_voided) return; // Skip voided/edited records in all calculations
+
                           // 🚨 THE FIX: ONLY look at the target date selected in the calendar!
                           if (tx.timestamp.substring(0, 10) !== targetDate) return;
                           
@@ -1515,6 +1608,7 @@ window.syncGlobalMonth = async function() {
   };
 
   window.renderExecutiveDashboard = function() {
+
       if(!window.GLOBAL_TRANSACTIONS) return;
 
       const monthVal = document.getElementById('global-month-filter').value;
@@ -1535,16 +1629,23 @@ window.syncGlobalMonth = async function() {
       let dailyRev = {}; let regionRev = {}; 
       
       const startD = new Date(startDateStr); const endD = new Date(endDateStr);
-      for(let d = new Date(startD); d <= endD; d.setDate(d.getDate()+1)) { dailyRev[d.toLocaleDateString('en-CA')] = 0; }
+      // Stop drawing the chart line at today's date so it doesn't dive to zero
+const todayDate = new Date();
+const limitDate = (endD > todayDate) ? todayDate : endD;
+for(let d = new Date(startD); d <= limitDate; d.setDate(d.getDate()+1)) { dailyRev[d.toLocaleDateString('en-CA')] = 0; }
 
      window.GLOBAL_TRANSACTIONS.forEach(tx => {
-          const txDate = tx.timestamp.substring(0, 10);
-          if(tx.record_type === 'SALE' && txDate >= startDateStr && txDate <= endDateStr) {
+    if (tx.is_voided) return; // <--- PASTE IT EXACTLY HERE
+    
+    const txDate = tx.timestamp.substring(0, 10);
+    if(tx.record_type === 'SALE' && txDate >= startDateStr && txDate <= endDateStr) {
+
               const val = parseFloat(tx.val) || 0; const qty = parseFloat(tx.qty) || 0;
               totalRev += val; 
               if(dailyRev[txDate] !== undefined) dailyRev[txDate] += val;
-              if(!regionRev[tx.region]) regionRev[tx.region] = 0;
-              regionRev[tx.region] += val;
+              const normRegion = window.normalizeRegion(tx.region);
+              if(!regionRev[normRegion]) regionRev[normRegion] = 0;
+              regionRev[normRegion] += val;
               if(!productVol[tx.sku]) productVol[tx.sku] = 0;
               productVol[tx.sku] += qty;
           }
@@ -1566,12 +1667,24 @@ window.syncGlobalMonth = async function() {
 
               const txDate = tx.timestamp.substring(0, 10);
               
-              // 🚨 FIX: Calculate physical stock from the beginning of time UP TO the end of the selected month.
               if (txDate <= endDateStr) {
                   const qty = parseFloat(tx.qty) || 0;
-                  if(tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT') globalInv[tx.sku].qty -= qty;
-                  else if(tx.record_type === 'TRANSFER' && tx.store === tx.dest_store) globalInv[tx.sku].qty += qty;
-                  else if(tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN') globalInv[tx.sku].qty += qty;
+                  const rType = tx.record_type;
+                  
+                  // STRICT ENGINE ALIGNMENT: 
+                  // By tracking Source and Dest Regions explicitly, the Dashboard will now mathematically 
+                  // mirror the exact sum of your Regional Hubs, dropping all Ghost Transactions.
+                  let sourceRegion = window.OUTLET_DATA && window.OUTLET_DATA[tx.store] ? window.normalizeRegion(window.OUTLET_DATA[tx.store].region) : null;
+                  let destRegion = window.OUTLET_DATA && window.OUTLET_DATA[tx.dest_store] ? window.normalizeRegion(window.OUTLET_DATA[tx.dest_store].region) : null;
+
+                  if (sourceRegion) {
+                      if(rType === 'SALE' || rType === 'BO' || rType === 'BUNDLE_OUT' || rType === 'TRANSFER') globalInv[tx.sku].qty -= qty;
+                      else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN') globalInv[tx.sku].qty += qty;
+                  }
+                  
+                  if (destRegion && rType === 'TRANSFER') {
+                      globalInv[tx.sku].qty += qty;
+                  }
               }
           });
           
@@ -1603,6 +1716,104 @@ window.syncGlobalMonth = async function() {
               }).join('');
           }
       }
+
+// --- NEW: NATIONAL SALES REPORT WIDGET ---
+      let reportDiv = document.getElementById('national-sales-report');
+      if (!reportDiv) {
+          reportDiv = document.createElement('div');
+          reportDiv.id = 'national-sales-report';
+          const topGrid = document.querySelector('#dash > .grid');
+          topGrid.insertAdjacentElement('afterend', reportDiv);
+      }
+
+      let globalTarget = 0;
+      let regionTargetsHTML = '';
+      
+      const currentMonthQuotas = (window.MASTER_DATA && window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[monthVal]) ? window.MASTER_DATA.quotas[monthVal] : {};
+      
+      if (Object.keys(currentMonthQuotas).length > 0) {
+          globalTarget = parseFloat(currentMonthQuotas['GLOBAL']) || 0;
+          
+          if (globalTarget > 0) {
+              const globalPct = Math.min((totalRev / globalTarget) * 100, 100).toFixed(1);
+              const globalColor = globalPct >= 100 ? 'bg-emerald-500' : 'bg-blue-600';
+              
+              const sortedRegions = Object.keys(currentMonthQuotas)
+                  .filter(r => r !== 'GLOBAL' && window.MASTER_DATA.regions && window.MASTER_DATA.regions.includes(r))
+                  .sort((a,b) => {
+                      const quotaA = parseFloat(currentMonthQuotas[a]) || 1;
+                      const quotaB = parseFloat(currentMonthQuotas[b]) || 1;
+                      const pctA = (regionRev[a] || 0) / quotaA;
+                      const pctB = (regionRev[b] || 0) / quotaB;
+                      return pctB - pctA; 
+                  });
+              
+              regionTargetsHTML = sortedRegions.map((reg, index) => {
+                  const regQuota = parseFloat(currentMonthQuotas[reg]);
+                  const rSales = regionRev[reg] || 0;
+                  const rPct = Math.min((rSales / regQuota) * 100, 100).toFixed(1);
+                  const variance = rSales - regQuota;
+                  const varColor = variance >= 0 ? 'text-emerald-500' : 'text-red-500';
+                  const barCol = rPct >= 100 ? 'bg-emerald-400' : 'bg-slate-300';
+                  const rankIcon = index === 0 && rSales > 0 ? `<i class="fa-solid fa-trophy text-amber-400 mr-2" title="Top Performing Region"></i>` : `<span class="w-4 inline-block"></span>`;
+                  
+                  return `
+                  <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+                      <td class="px-4 py-3 font-black text-slate-700 text-xs flex items-center">${rankIcon} ${reg}</td>
+                      <td class="px-4 py-3 text-right font-bold text-slate-500 text-xs">₱${regQuota.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                      <td class="px-4 py-3 text-right font-black text-slate-800 text-xs">₱${rSales.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                      <td class="px-4 py-3 text-right font-bold ${varColor} text-xs">₱${variance.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                      <td class="px-4 py-3 align-middle w-32">
+                          <div class="flex items-center gap-2">
+                              <div class="w-full bg-slate-100 rounded-full h-1.5"><div class="${barCol} h-1.5 rounded-full shadow-sm" style="width: ${rPct}%"></div></div>
+                              <span class="text-[9px] font-black ${index === 0 && rSales > 0 ? 'text-amber-500' : 'text-slate-500'} w-8 text-right">${rPct}%</span>
+                          </div>
+                      </td>
+                  </tr>`;
+              }).join('');
+
+              reportDiv.innerHTML = `
+                  <div class="glass-card overflow-hidden border border-slate-200 mt-6 shadow-md relative">
+                      <div class="absolute right-0 top-0 w-64 h-full bg-gradient-to-l from-blue-50 to-transparent pointer-events-none"></div>
+                      <div class="p-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10">
+                          <div>
+                              <h3 class="text-lg font-black tracking-widest text-amber-400 uppercase"><i class="fa-solid fa-chart-pie mr-2 text-white"></i> National Sales Report</h3>
+                              <p class="text-[10px] text-slate-300 font-bold uppercase tracking-widest mt-1">Aggregated Executive Target</p>
+                          </div>
+                          <div class="text-right w-full md:w-auto">
+                              <p class="text-[9px] uppercase tracking-widest text-slate-400 mb-1">Global Achievement vs Target</p>
+                              <div class="flex items-center gap-4">
+                                  <div class="text-right hidden md:block">
+                                      <p class="text-xs font-bold text-slate-300">Target: ₱${globalTarget.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+                                  </div>
+                                  <div class="flex items-center gap-3 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                                      <div class="w-24 bg-slate-700 rounded-full h-2 shadow-inner"><div class="${globalColor} h-2 rounded-full shadow-[0_0_8px_rgba(59,130,246,0.8)]" style="width: ${globalPct}%"></div></div>
+                                      <span class="font-black text-sm ${globalPct >= 100 ? 'text-emerald-400' : 'text-blue-400'}">${globalPct}%</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="overflow-x-auto custom-scrollbar relative z-10 bg-white">
+                          <table class="w-full text-left">
+                              <thead class="bg-slate-50 text-[9px] font-black uppercase text-slate-400 border-b border-slate-200">
+                                  <tr>
+                                      <th class="px-4 py-3">Region Hub</th>
+                                      <th class="px-4 py-3 text-right">Set Target</th>
+                                      <th class="px-4 py-3 text-right text-emerald-600">Gross Sales</th>
+                                      <th class="px-4 py-3 text-right">Variance</th>
+                                      <th class="px-4 py-3 text-center">Achieved</th>
+                                  </tr>
+                              </thead>
+                              <tbody class="divide-y divide-slate-50">
+                                  ${regionTargetsHTML}
+                              </tbody>
+                          </table>
+                      </div>
+                  </div>
+              `;
+          } else { reportDiv.innerHTML = ''; }
+      } else { reportDiv.innerHTML = ''; }
+
 
     // TRIGGER THE SPECIFIC DATE ANALYZER!
       window.analyzeSpecificDate();
@@ -1690,6 +1901,8 @@ window.syncGlobalMonth = async function() {
   };
 
 window.renderMasterInventory = function() {
+
+	
       const tbody = document.getElementById('master-inv-body');
       const queryText = document.getElementById('inv-search') ? document.getElementById('inv-search').value.toLowerCase() : '';
       const timeFilter = document.getElementById('inv-time-filter') ? document.getElementById('inv-time-filter').value : 'ALL';
@@ -1709,43 +1922,55 @@ window.renderMasterInventory = function() {
           return;
       }
 
-      let invData = {};
+let invData = {};
       Object.keys(window.SKU_DATA).forEach(sku => {
-          // 🚨 FIX: Track Beginning Inventory independently!
-          invData[sku] = { name: window.SKU_DATA[sku].name, price: window.SKU_DATA[sku].price, begInv: 0, in: 0, out: 0 };
+          invData[sku] = { name: window.SKU_DATA[sku].name, price: window.SKU_DATA[sku].price, begInv: 0, in: 0, sold: 0, bo: 0, bundleOut: 0 };
       });
 
-      // Calculate Global Totals with Time Filter
       window.GLOBAL_TRANSACTIONS.forEach(tx => {
-          if(!invData[tx.sku]) return;
-          
-          const qty = parseFloat(tx.qty) || 0;
-          const txDate = tx.timestamp.substring(0, 10);
+    if (tx.is_voided) return; // <--- PASTE IT EXACTLY HERE
+    
+    if(!invData[tx.sku]) return;
+    
+    const qty = parseFloat(tx.qty) || 0;
 
+          const txDate = tx.timestamp.substring(0, 10);
+          const rType = tx.record_type;
+
+          const isValidSource = window.OUTLET_DATA && window.OUTLET_DATA[tx.store];
+
+          // STRICT GLOBAL VIEW: Internal Transfers are completely ignored.
           if (timeFilter === 'MONTH' && startStr && endStr) {
               if (txDate < startStr) {
-                  // Historical: Forms the Beginning Inventory baseline
-                  if(tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT') invData[tx.sku].begInv -= qty;
-                  else if(tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN') invData[tx.sku].begInv += qty;
+                  if (isValidSource) {
+                      if(rType === 'SALE' || rType === 'BO' || rType === 'BUNDLE_OUT') invData[tx.sku].begInv -= qty;
+                      else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN') invData[tx.sku].begInv += qty;
+                  }
               } else if (txDate >= startStr && txDate <= endStr) {
-                  // Current Month: Adds to IN/OUT columns
-                  if(tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT') invData[tx.sku].out += qty;
-                  else if(tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN') invData[tx.sku].in += qty;
+                  if (isValidSource) {
+                      if(rType === 'SALE') invData[tx.sku].sold += qty;
+                      else if(rType === 'BO') invData[tx.sku].bo += qty;
+                      else if(rType === 'BUNDLE_OUT') invData[tx.sku].bundleOut += qty; // BUG FIXED: Raw Materials Deducted
+                      else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN') invData[tx.sku].in += qty;
+                  }
               }
           } else {
-              // ALL TIME
-              if(tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT') invData[tx.sku].out += qty;
-              else if(tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN') invData[tx.sku].in += qty;
+              if (isValidSource) {
+                  if(rType === 'SALE') invData[tx.sku].sold += qty;
+                  else if(rType === 'BO') invData[tx.sku].bo += qty;
+                  else if(rType === 'BUNDLE_OUT') invData[tx.sku].bundleOut += qty; // BUG FIXED
+                  else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN') invData[tx.sku].in += qty;
+              }
           }
       });
 
       let html = '';
-      Object.keys(invData).forEach(sku => {
+      Object.keys(invData).sort().forEach(sku => {
           const item = invData[sku];
           if(queryText && !`${sku} ${item.name}`.toLowerCase().includes(queryText)) return;
           
-          // 🚨 FIX: Net Physical Stock = Beg Inv + In - Out
-          const endInv = item.begInv + item.in - item.out;
+          // NET PHYSICAL STOCK: Safely deducting consumed bundle materials without cluttering UI
+          const endInv = item.begInv + item.in - item.sold - item.bo - item.bundleOut;
           
           const assetVal = endInv > 0 ? endInv * item.price : 0;
           const eiColor = endInv < 0 ? 'text-red-500' : 'text-slate-800';
@@ -1754,8 +1979,10 @@ window.renderMasterInventory = function() {
           <tr class="hover:bg-slate-50 transition-colors">
               <td class="px-6 py-4 font-black text-slate-800 leading-tight">${sku}<br><span class="font-bold text-[9px] text-slate-400 uppercase tracking-widest">${item.name}</span></td>
               <td class="px-6 py-4 text-center font-bold text-slate-500">₱${item.price.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+              <td class="px-6 py-4 text-center font-black text-slate-500">${item.begInv}</td>
               <td class="px-6 py-4 text-center font-black text-emerald-500">${item.in}</td>
-              <td class="px-6 py-4 text-center font-black text-blue-500">${item.out}</td>
+              <td class="px-6 py-4 text-center font-black text-blue-500">${item.sold}</td>
+              <td class="px-6 py-4 text-center font-black text-orange-500">${item.bo}</td>
               <td class="px-6 py-4 text-center font-black ${eiColor} text-lg bg-slate-50">${endInv}</td>
               <td class="px-6 py-4 text-right font-black text-emerald-700">₱${assetVal.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
           </tr>`;
@@ -1802,7 +2029,8 @@ window.renderMasterInventory = function() {
 
       window.MASTER_LEDGER_FILTERED = window.GLOBAL_TRANSACTIONS.filter(tx => {
           // 1. Check Dropdowns First (Eliminates non-matches instantly)
-          if (filterStore !== 'ALL' && tx.store !== filterStore) return false;
+          // Check BOTH the origin store and the destination store!
+if (filterStore !== 'ALL' && tx.store !== filterStore && tx.dest_store !== filterStore) return false;
           if (filterSku !== 'ALL' && tx.sku !== filterSku) return false;
 
           // 2. Then check text search (for Dates, Remarks, DR#)
@@ -1854,39 +2082,67 @@ window.renderMasterInventory = function() {
           else if (tx.record_type === "BUNDLE_IN") auditBadge = `<span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-[8px] font-black uppercase tracking-widest border border-indigo-200 shadow-sm">BUNDLE IN</span>`;
 
           let actionButtons = '';
-          if(showActions) {
-              if (window.CURRENT_USER && window.CURRENT_USER.role === 'Admin') {
-                  actionButtons = `<td class="px-6 py-3 text-center whitespace-nowrap">
-                      <button onclick="window.promptEditTx('${tx.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 hover:bg-blue-600 hover:text-white transition-colors shadow-sm mr-1" title="Edit"><i class="fa-solid fa-pen text-xs"></i></button>
-                      <button onclick="window.promptDeleteTx('${tx.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-600 hover:text-white transition-colors shadow-sm" title="Delete"><i class="fa-solid fa-trash text-xs"></i></button>
-                  </td>`;
-              } else {
-                  actionButtons = `<td class="px-6 py-3 text-center"><button onclick="window.showToast('Restricted: Admin Override Required', 'warning')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-300 hover:bg-amber-500 hover:text-white transition-colors"><i class="fa-solid fa-lock text-[10px]"></i></button></td>`;
-              }
-          }
+        let personnelColumn = ''; // 🚨 NEW: Variable to hold our new column
+
+        if(showActions) {
+            // 1. Setup Admin Buttons
+            if (window.CURRENT_USER && window.CURRENT_USER.role === 'Admin') {
+                actionButtons = `<td class="px-6 py-3 text-center whitespace-nowrap">
+                    <button onclick="window.promptEditTx('${tx.id}')" class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 hover:bg-blue-600 hover:text-white transition-colors shadow-sm mr-1" title="Edit"><i class="fa-solid fa-pen text-xs"></i></button>
+                    <button onclick="window.promptDeleteTx('${tx.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 hover:bg-red-600 hover:text-white transition-colors shadow-sm" title="Delete"><i class="fa-solid fa-trash text-xs"></i></button>
+                </td>`;
+            } else {
+                actionButtons = `<td class="px-6 py-3 text-center"><button onclick="window.showToast('Restricted: Admin Override Required', 'warning')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-300 hover:bg-amber-500 hover:text-white transition-colors"><i class="fa-solid fa-lock text-[10px]"></i></button></td>`;
+            }
+
+            // 2. 🚨 NEW: Setup Personnel & Approver Names
+            let staffName = tx.staff ? tx.staff : "System";
+            let remarksText = tx.remarks ? `<br><span class="text-[9px] font-bold text-slate-400 italic">${tx.remarks}</span>` : "";
+            
+            // Highlight the void/edit remarks so the Approver Name is highly visible!
+            if (tx.is_voided) {
+                remarksText = `<br><span class="text-[10px] font-black text-red-500 tracking-widest">${tx.remarks}</span>`;
+            } else if (tx.remarks && tx.remarks.includes('[CORRECTED ENTRY]')) {
+                remarksText = `<br><span class="text-[10px] font-black text-amber-500 tracking-widest">${tx.remarks}</span>`;
+            }
+
+            personnelColumn = `
+            <td class="px-6 py-3 leading-tight">
+                <span class="font-black text-slate-700 text-xs"><i class="fa-solid fa-user-tag text-slate-300 mr-1"></i> ${staffName}</span>
+                ${remarksText}
+            </td>`;
+        }
 
           let valDisplay = `₱${parseFloat(tx.val).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-          if(tx.record_type === 'TRANSFER' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_IN' || tx.record_type === 'BUNDLE_OUT' || tx.record_type === 'MANUAL_IN') valDisplay = '--';
+        if(tx.record_type === 'TRANSFER' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_IN' || tx.record_type === 'BUNDLE_OUT' || tx.record_type === 'MANUAL_IN') valDisplay = '--';
 
-          return `
-          <tr class="hover:bg-slate-50 transition-colors">
-              <td class="px-6 py-3 font-bold text-slate-500 whitespace-nowrap">${dt}</td>
-              <td class="px-6 py-3 leading-tight">
-                  <span class="font-black text-slate-800">${tx.store}</span><br>
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${tx.region} &bull; ${tx.type}</span>
-                  ${tx.dest_store ? `<br><span class="text-[9px] font-black text-purple-500"><i class="fa-solid fa-arrow-right mx-1"></i> ${tx.dest_store}</span>` : ''}
-              </td>
-              <td class="px-6 py-3 font-black text-blue-600">${tx.sku}</td>
-              <td class="px-6 py-3 text-center font-black">${tx.qty}</td>
-              <td class="px-6 py-3 text-right font-black text-emerald-600">${valDisplay}</td>
-              <td class="px-6 py-3 text-center">${auditBadge}</td>
-              ${actionButtons}
-          </tr>`;
-      }).join('');
-  }
+        // Add a visual strike-through for soft-deleted/edited records
+        if (tx.is_voided) {
+            auditBadge = `<span class="px-2 py-1 bg-red-900 text-red-100 rounded text-[8px] font-black uppercase tracking-widest shadow-sm">${tx.audit}</span>`;
+            valDisplay = `<span class="line-through opacity-50">${valDisplay}</span>`;
+        }
+
+        return `
+        <tr class="hover:bg-slate-50 transition-colors">
+            <td class="px-6 py-3 font-bold text-slate-500 whitespace-nowrap">${dt}</td>
+            <td class="px-6 py-3 leading-tight">
+                <span class="font-black text-slate-800">${tx.store}</span><br>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${tx.region} &bull; ${tx.type}</span>
+                ${tx.dest_store ? `<br><span class="text-[9px] font-black text-purple-500"><i class="fa-solid fa-arrow-right mx-1"></i> ${tx.dest_store}</span>` : ''}
+            </td>
+            ${personnelColumn}
+            <td class="px-6 py-3 font-black text-blue-600">${tx.sku}</td>
+            <td class="px-6 py-3 text-center font-black">${tx.qty}</td>
+            <td class="px-6 py-3 text-right font-black text-emerald-600">${valDisplay}</td>
+            <td class="px-6 py-3 text-center">${auditBadge}</td>
+            ${actionButtons}
+        </tr>`;
+    }).join('');
+}
 
   // --- REGIONAL HUBS & OUTLET DASHBOARD ENGINE ---
   window.renderRegionalDrilldown = function() {
+
       const selectedRegion = document.getElementById('drilldown-region-select').value;
       const outletListContainer = document.getElementById('hub-outlet-list');
       if (!selectedRegion) return;
@@ -1897,9 +2153,22 @@ window.renderMasterInventory = function() {
       let regionSales = 0; let outletSales = 0; let consigSales = 0; let otherSales = 0; 
       let regionStores = [];
 
+// SMART GROUPING ENGINE:
+      // If Visayas is selected, grab Cebu, Iloilo, and Tacloban. Otherwise, be exact!
+      const isTargetRegion = (dbRegion) => {
+          if (!dbRegion) return false;
+          if (selectedRegion === 'Visayas') {
+              const low = dbRegion.toLowerCase();
+              return low === 'cebu' || low === 'iloilo' || low === 'tacloban' || low === 'visayas';
+          }
+          return dbRegion === selectedRegion;
+      };
+
       if (window.OUTLET_DATA) {
           Object.keys(window.OUTLET_DATA).forEach(storeName => {
-              if (window.OUTLET_DATA[storeName].region === selectedRegion) { regionStores.push({ name: storeName, type: window.OUTLET_DATA[storeName].type }); }
+              if (isTargetRegion(window.OUTLET_DATA[storeName].region)) { 
+                  regionStores.push({ name: storeName, type: window.OUTLET_DATA[storeName].type }); 
+              }
           });
       }
 
@@ -1910,10 +2179,13 @@ window.renderMasterInventory = function() {
       }
 
       window.GLOBAL_TRANSACTIONS.forEach(tx => {
-          const txDate = tx.timestamp.substring(0, 10);
-          let isDateValid = (!startD || !endD) ? true : (txDate >= startD && txDate <= endD);
+    if (tx.is_voided) return; // <--- PASTE IT EXACTLY HERE
+    
+    const txDate = tx.timestamp.substring(0, 10);
+    let isDateValid = (!startD || !endD) ? true : (txDate >= startD && txDate <= endD);
+    // ... rest of code
           
-          if (tx.region === selectedRegion && tx.record_type === 'SALE' && isDateValid) {
+          if (isTargetRegion(tx.region) && tx.record_type === 'SALE' && isDateValid) {
               const val = parseFloat(tx.val) || 0;
               regionSales += val;
               const typeStr = tx.type ? tx.type.toLowerCase() : "";
@@ -1922,20 +2194,16 @@ window.renderMasterInventory = function() {
               else otherSales += val;
           }
 
-          // ASSET MATH: Calculate Current Stock Value specifically for this Region
-          // We use endDateStr as the time blinder so it doesn't look into the future
           if (!endD || txDate <= endD) {
               const qty = parseFloat(tx.qty) || 0;
               let destRegion = window.OUTLET_DATA && window.OUTLET_DATA[tx.dest_store] ? window.OUTLET_DATA[tx.dest_store].region : null;
               
-              if (tx.region === selectedRegion) {
-                  // Items leaving this region's outlets
+              if (isTargetRegion(tx.region)) {
                   if(tx.record_type === 'SALE' || tx.record_type === 'BO' || tx.record_type === 'BUNDLE_OUT') regionInv[tx.sku] -= qty;
                   else if(tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN' || tx.record_type === 'BUNDLE_IN') regionInv[tx.sku] += qty;
-                  else if(tx.record_type === 'TRANSFER') regionInv[tx.sku] -= qty; // Deduct transfer out
+                  else if(tx.record_type === 'TRANSFER') regionInv[tx.sku] -= qty; 
               }
-              if (destRegion === selectedRegion && tx.record_type === 'TRANSFER') {
-                  // Items entering this region from transfers
+              if (isTargetRegion(destRegion) && tx.record_type === 'TRANSFER') {
                   regionInv[tx.sku] += qty;
               }
           }
@@ -1956,6 +2224,112 @@ window.renderMasterInventory = function() {
           <div class="px-3 py-2 bg-blue-50 rounded-lg border border-blue-100"><p class="text-[8px] font-black text-blue-600 uppercase tracking-widest">Outlets</p><h4 class="font-black text-sm text-blue-700">₱${outletSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4></div>
           <div class="px-3 py-2 bg-purple-50 rounded-lg border border-purple-100"><p class="text-[8px] font-black text-purple-600 uppercase tracking-widest">Consignments</p><h4 class="font-black text-sm text-purple-700">₱${consigSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4></div>
       `;
+
+      // --- NEW: UPGRADED SMART QUOTA TRACKER WIDGET ---
+      let targetDiv = document.getElementById('regional-quota-tracker');
+      if (!targetDiv) {
+          targetDiv = document.createElement('div');
+          targetDiv.id = 'regional-quota-tracker';
+          targetDiv.className = 'w-full mb-6';
+          document.querySelector('#regions').insertBefore(targetDiv, document.querySelector('#regions .glass-card'));
+      }
+
+      // NEW: Beautiful empty state placeholder instead of just vanishing!
+      let quotaHtml = `
+          <div class="bg-slate-50 border border-slate-200 border-dashed rounded-2xl p-6 text-center shadow-sm mb-6 flex flex-col items-center justify-center">
+              <div class="w-12 h-12 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center mb-3"><i class="fa-solid fa-bullseye text-lg"></i></div>
+              <h4 class="font-black text-slate-500 uppercase tracking-widest text-xs">No Target Assigned</h4>
+              <p class="text-[10px] font-bold text-slate-400 mt-1">Please ask the System Admin to configure a monthly quota for this territory.</p>
+          </div>
+      `;
+      
+      const monthVal = document.getElementById('global-month-filter').value;
+      const regionQuota = (window.MASTER_DATA && window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[monthVal] && window.MASTER_DATA.quotas[monthVal][selectedRegion]) ? parseFloat(window.MASTER_DATA.quotas[monthVal][selectedRegion]) : 0;
+      
+      if (regionQuota > 0) {
+          const targetYear = parseInt(monthVal.split('-')[0]); 
+          const targetMonth = parseInt(monthVal.split('-')[1]);
+          const today = new Date();
+          const isCurrentMonth = (today.getFullYear() === targetYear && today.getMonth() + 1 === targetMonth);
+          const endOfMonth = new Date(targetYear, targetMonth, 0);
+          
+          let remainingDays = 0;
+          if (isCurrentMonth) {
+              remainingDays = endOfMonth.getDate() - today.getDate();
+              if (remainingDays < 1) remainingDays = 1; 
+          } else if (today < endOfMonth) {
+              remainingDays = endOfMonth.getDate(); 
+          }
+
+          const pctAchieved = Math.min((regionSales / regionQuota) * 100, 100).toFixed(1);
+          const rawPct = ((regionSales / regionQuota) * 100).toFixed(1);
+          const remainingSales = Math.max(0, regionQuota - regionSales);
+          const dailyRequired = remainingDays > 0 ? remainingSales / remainingDays : 0;
+          
+          // --- AI FORECAST MATH ---
+          const daysPassed = isCurrentMonth ? Math.max(1, today.getDate()) : endOfMonth.getDate();
+          const projectedTotal = (regionSales / Math.max(1, daysPassed)) * endOfMonth.getDate();
+          const projectedVariance = projectedTotal - regionQuota;
+          const trajColor = projectedVariance >= 0 ? 'text-emerald-600' : 'text-orange-600';
+          const trajBg = projectedVariance >= 0 ? 'bg-emerald-50/80 border-emerald-200' : 'bg-orange-50/80 border-orange-200';
+          const trajIcon = projectedVariance >= 0 ? 'fa-rocket' : 'fa-route';
+          
+          const barColor = pctAchieved >= 100 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]' : (pctAchieved >= 75 ? 'bg-blue-500' : 'bg-amber-500');
+
+          quotaHtml = `
+              <div class="bg-white p-6 md:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+                  <div class="absolute right-0 top-0 w-48 h-full bg-slate-50/50 rounded-bl-[100px] pointer-events-none"></div>
+                  
+                  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 relative z-10 gap-4">
+                      <div>
+                          <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2"><i class="fa-solid fa-bullseye text-amber-500"></i> Target Objective</p>
+                          <h4 class="font-black text-3xl md:text-4xl text-slate-800 tracking-tight mt-1">₱${regionQuota.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
+                      </div>
+                      <div class="text-left md:text-right">
+                          <p class="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Achieved So Far</p>
+                          <h4 class="font-black text-2xl md:text-3xl text-emerald-600 tracking-tight mt-1">₱${regionSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
+                      </div>
+                  </div>
+                  
+                  <div class="relative z-10 mb-6">
+                      <div class="flex justify-between items-end mb-2">
+                          <span class="font-black text-2xl ${pctAchieved >= 100 ? 'text-emerald-500' : 'text-slate-800'}">${rawPct}%</span>
+                          <span class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-lg">${remainingDays > 0 ? `<i class="fa-regular fa-clock text-amber-500 mr-1"></i> <span class="text-amber-600 font-black">${remainingDays}</span> Days Remaining` : 'Period Ended'}</span>
+                      </div>
+                      <div class="w-full bg-slate-100 rounded-full h-4 shadow-inner overflow-hidden border border-slate-200/50">
+                          <div class="${barColor} h-4 rounded-full transition-all duration-1000" style="width: ${pctAchieved}%"></div>
+                      </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-6 relative z-10">
+                      <div class="bg-red-50/50 p-4 rounded-xl border border-red-100 flex justify-between items-center">
+                          <div>
+                              <p class="text-[9px] font-black uppercase text-red-500 tracking-widest mb-1">Current Deficit</p>
+                              <h5 class="font-black text-lg text-red-600 tracking-tight">₱${remainingSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h5>
+                          </div>
+                          <div class="w-8 h-8 rounded-full bg-red-100 text-red-500 flex items-center justify-center"><i class="fa-solid fa-arrow-trend-down text-xs"></i></div>
+                      </div>
+                      <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-100 flex justify-between items-center">
+                          <div>
+                              <p class="text-[9px] font-black uppercase text-blue-500 tracking-widest mb-1">Required Per Day</p>
+                              <h5 class="font-black text-lg ${pctAchieved >= 100 ? 'text-emerald-500' : 'text-blue-600'} tracking-tight">${pctAchieved >= 100 ? 'SECURED!' : (remainingDays > 0 ? `₱${dailyRequired.toLocaleString(undefined, {minimumFractionDigits: 2})}` : 'NO TIME')}</h5>
+                          </div>
+                          <div class="w-8 h-8 rounded-full ${pctAchieved >= 100 ? 'bg-emerald-100 text-emerald-500' : 'bg-blue-100 text-blue-500'} flex items-center justify-center"><i class="fa-solid fa-gauge-high text-xs"></i></div>
+                      </div>
+                      <div class="${trajBg} p-4 rounded-xl border flex justify-between items-center">
+                          <div>
+                              <p class="text-[9px] font-black uppercase ${trajColor} tracking-widest mb-1">Trajectory Forecast</p>
+                              <h5 class="font-black text-lg ${trajColor} tracking-tight">₱${projectedTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</h5>
+                              <p class="text-[8px] font-bold ${trajColor} uppercase mt-0.5 opacity-80">Proj. ${projectedVariance >= 0 ? 'Surplus' : 'Deficit'}: ₱${Math.abs(projectedVariance).toLocaleString(undefined, {minimumFractionDigits:2})}</p>
+                          </div>
+                          <div class="w-8 h-8 rounded-full bg-white/50 ${trajColor} flex items-center justify-center"><i class="fa-solid ${trajIcon} text-xs"></i></div>
+                      </div>
+                  </div>
+              </div>
+          `;
+      }
+      targetDiv.innerHTML = quotaHtml;
+      
 
       if (regionStores.length === 0) { outletListContainer.innerHTML = `<p class="text-xs font-bold text-slate-400 italic text-center mt-4">No outlets registered here.</p>`; } 
       else {
@@ -2072,6 +2446,7 @@ window.viewOutletDashboard = function(storeName, storeTypeOrRegion) {
 
 
   window.refreshOutletDashboard = function() {
+
       if(!window.CURRENT_OUTLET.name) return;
       const storeName = window.CURRENT_OUTLET.name;
       const isGodView = storeName === 'REGION_ALL';
@@ -2098,23 +2473,30 @@ window.viewOutletDashboard = function(storeName, storeTypeOrRegion) {
       
       // NEW: Buckets to hold the data for the new Outlet Charts
       let outletDailyRev = {}; let outletProductVol = {};
-      for(let d = new Date(start); d <= end; d.setDate(d.getDate()+1)) { outletDailyRev[d.toLocaleDateString('en-CA')] = 0; }
+      // Stop the outlet chart line at today's date
+const todayDate = new Date();
+const limitDate = (end > todayDate) ? todayDate : end;
+for(let d = new Date(start); d <= limitDate; d.setDate(d.getDate()+1)) { outletDailyRev[d.toLocaleDateString('en-CA')] = 0; }
 
-      window.GLOBAL_TRANSACTIONS.forEach(tx => {
-          let isRelevant = false;
-          let isIncomingTransfer = false;
+window.GLOBAL_TRANSACTIONS.forEach(tx => {
+    if (tx.is_voided) return; // <--- PASTE IT EXACTLY HERE
+    
+    let isRelevant = false;
+    let isSource = false;
 
-          // Figure out if this transaction belongs in the current view
+          let isDest = false;
+
+          // STRICT DECOUPLING: Identify exactly what role this store/region plays in the transaction
           if (isGodView) {
-              if (tx.region === filterRegion) isRelevant = true;
+              if (tx.region === filterRegion) { isSource = true; isRelevant = true; }
               let destRegion = window.OUTLET_DATA && window.OUTLET_DATA[tx.dest_store] ? window.OUTLET_DATA[tx.dest_store].region : null;
               if (tx.record_type === 'TRANSFER' && destRegion === filterRegion) {
-                  isIncomingTransfer = true; isRelevant = true;
+                  isDest = true; isRelevant = true;
               }
           } else {
-              if (tx.store === storeName) isRelevant = true;
+              if (tx.store === storeName) { isSource = true; isRelevant = true; }
               if (tx.record_type === 'TRANSFER' && tx.dest_store === storeName) {
-                  isIncomingTransfer = true; isRelevant = true;
+                  isDest = true; isRelevant = true;
               }
           }
 
@@ -2126,64 +2508,57 @@ window.viewOutletDashboard = function(storeName, storeTypeOrRegion) {
 
               if(!storeInventory[tx.sku]) storeInventory[tx.sku] = { name: "Unknown SKU", begInv: 0, in: 0, sold: 0, bo: 0, transferOut: 0, sales: 0, endInv: 0 };
 
-              // MATH TIME
-
+              // BULLETPROOF MATH TIME
               if (txDate < startDateStr) {
-                  if (rType === 'SALE' && !isIncomingTransfer) storeInventory[tx.sku].begInv -= qty;
-                  if (rType === 'BO' && !isIncomingTransfer) storeInventory[tx.sku].begInv -= qty;
-                  if (rType === 'TRANSFER' && !isIncomingTransfer) storeInventory[tx.sku].begInv -= qty;
-                  if (rType === 'TRANSFER' && isIncomingTransfer) storeInventory[tx.sku].begInv += qty;
-                  if (rType === 'INBOUND') storeInventory[tx.sku].begInv += qty; // THE TIME TRAVEL FIX!
+                  if (rType === 'SALE' && isSource) storeInventory[tx.sku].begInv -= qty;
+                  if (rType === 'BO' && isSource) storeInventory[tx.sku].begInv -= qty;
                   
-                  // NEW: Factor manual receives and auto-bundles into historical beginning inventory
+                  // Deduct if leaving, Add if arriving (Intra-region handles both safely!)
+                  if (rType === 'TRANSFER' && isSource) storeInventory[tx.sku].begInv -= qty;
+                  if (rType === 'TRANSFER' && isDest) storeInventory[tx.sku].begInv += qty;
+                  
+                  if (rType === 'INBOUND') storeInventory[tx.sku].begInv += qty; 
                   if (rType === 'MANUAL_IN' || rType === 'BUNDLE_IN') storeInventory[tx.sku].begInv += qty;
                   if (rType === 'BUNDLE_OUT') storeInventory[tx.sku].begInv -= qty;
              } 
               else if (txDate >= startDateStr && txDate <= endDateStr) {
-                  if (rType === 'SALE' && !isIncomingTransfer) {
+                  if (rType === 'SALE' && isSource) {
                       periodTotalSales += val;
                       storeInventory[tx.sku].sold += qty; storeInventory[tx.sku].sales += val;
                       periodTransactions.push({...tx, displayType: 'SALE'});
-                      
-                      // NEW: Feed the analytics charts!
                       if (outletDailyRev[txDate] !== undefined) outletDailyRev[txDate] += val;
                       outletProductVol[tx.sku] = (outletProductVol[tx.sku] || 0) + qty;
                   }
-                  else if (rType === 'BO' && !isIncomingTransfer) {
+                  else if (rType === 'BO' && isSource) {
                       storeInventory[tx.sku].bo += qty;
                       periodTransactions.push({...tx, displayType: 'B.O.'});
                   }
-                  else if (rType === 'TRANSFER' && !isIncomingTransfer) {
-                      storeInventory[tx.sku].transferOut += qty;
-                      periodTransactions.push({...tx, displayType: 'TRANS-OUT'});
-                  }
-                  else if (rType === 'TRANSFER' && isIncomingTransfer) {
-                      storeInventory[tx.sku].in += qty;
-                      periodTransactions.push({...tx, displayType: 'TRANS-IN'});
+                  else if (rType === 'TRANSFER') {
+                      // Deduct if leaving, Add if arriving
+                      if (isSource) storeInventory[tx.sku].transferOut += qty;
+                      if (isDest) storeInventory[tx.sku].in += qty;
+                      
+                      // Only push to activity feed once if we are in God View to avoid double-logging
+                      if (isSource) periodTransactions.push({...tx, displayType: 'TRANS-OUT'});
+                      else if (isDest && !isSource) periodTransactions.push({...tx, displayType: 'TRANS-IN'});
                   }
                   else if (rType === 'INBOUND') {
                       storeInventory[tx.sku].in += qty;
                       periodTransactions.push({...tx, displayType: 'INBOUND'});
                   }
-                  // NEW: Route Manual Receives specifically to the IN column
                   else if (rType === 'MANUAL_IN') {
                       storeInventory[tx.sku].in += qty;
                       periodTransactions.push({...tx, displayType: 'MANUAL_RCV'});
                   }
-                  // NEW: Route bundle components behind the scenes
                   else if (rType === 'BUNDLE_IN') {
                       storeInventory[tx.sku].in += qty;
-                      // We purposely do NOT push BUNDLE_IN to periodTransactions to keep the activity feed clean
                   }
                   else if (rType === 'BUNDLE_OUT') {
-                      storeInventory[tx.sku].transferOut += qty; // Acts as a deduction
-                      // We purposely do NOT push BUNDLE_OUT to periodTransactions either
+                      storeInventory[tx.sku].transferOut += qty; 
                   }
               }
-          } // <--- THIS IS THE MISSING BRACKET THAT FIXES EVERYTHING!
+          }
       });
-
-      // Calculate Ending Inventory
 
       // Calculate Ending Inventory
       Object.keys(storeInventory).forEach(sku => {
@@ -2192,6 +2567,112 @@ window.viewOutletDashboard = function(storeName, storeTypeOrRegion) {
       });
 
       document.getElementById('dash-outlet-sales').innerText = `₱${periodTotalSales.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+
+      // --- NEW: OUTLET-SPECIFIC SMART QUOTA WIDGET ---
+      let outletQuotaDiv = document.getElementById('outlet-smart-quota-container');
+      if (!outletQuotaDiv) {
+          outletQuotaDiv = document.createElement('div');
+          outletQuotaDiv.id = 'outlet-smart-quota-container';
+          outletQuotaDiv.className = 'w-full mb-4 shrink-0';
+          const headerBlock = document.querySelector('#outlet-dashboard-view > .border-b');
+          if (headerBlock) headerBlock.insertAdjacentElement('afterend', outletQuotaDiv);
+      }
+
+      const monthVal = document.getElementById('global-month-filter').value;
+      const outletQuota = (window.MASTER_DATA && window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[monthVal] && window.MASTER_DATA.quotas[monthVal][storeName]) ? parseFloat(window.MASTER_DATA.quotas[monthVal][storeName]) : 0;
+
+      if (!isGodView && outletQuota > 0) {
+          const targetYear = parseInt(monthVal.split('-')[0]); 
+          const targetMonth = parseInt(monthVal.split('-')[1]);
+          const today = new Date();
+          const isCurrentMonth = (today.getFullYear() === targetYear && today.getMonth() + 1 === targetMonth);
+          const endOfMonth = new Date(targetYear, targetMonth, 0);
+
+          let daysPassed = 0;
+          let totalPeriodDays = diffDays; 
+
+          if (today >= start && today <= end) {
+              daysPassed = Math.ceil(Math.abs(today - start) / (1000 * 60 * 60 * 24)) + 1;
+          } else if (today > end) {
+              daysPassed = totalPeriodDays;
+          } else {
+              daysPassed = 1; 
+          }
+
+          let remainingDays = totalPeriodDays - daysPassed;
+          if (remainingDays < 0) remainingDays = 0;
+
+          const pctAchieved = Math.min((periodTotalSales / outletQuota) * 100, 100).toFixed(1);
+          const rawPct = ((periodTotalSales / outletQuota) * 100).toFixed(1);
+          const remainingSales = Math.max(0, outletQuota - periodTotalSales);
+          const dailyRequired = remainingDays > 0 ? remainingSales / remainingDays : 0;
+          
+          const projectedTotal = (periodTotalSales / Math.max(1, daysPassed)) * totalPeriodDays;
+          const projectedVariance = projectedTotal - outletQuota;
+          
+          const trajColor = projectedVariance >= 0 ? 'text-emerald-600' : 'text-orange-600';
+          const trajBg = projectedVariance >= 0 ? 'bg-emerald-50/80 border-emerald-200' : 'bg-orange-50/80 border-orange-200';
+          const barColor = pctAchieved >= 100 ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]' : (pctAchieved >= 75 ? 'bg-blue-500' : 'bg-amber-500');
+
+          outletQuotaDiv.innerHTML = `
+              <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+                   <div class="flex justify-between items-center mb-4 relative z-10 gap-4 border-b border-slate-100 pb-3">
+                      <div>
+                          <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest"><i class="fa-solid fa-store text-amber-500 mr-1"></i> Outlet Target</p>
+                          <h4 class="font-black text-xl text-slate-800 tracking-tight mt-0.5">₱${outletQuota.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
+                      </div>
+                      <div class="text-right">
+                          <p class="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Achieved</p>
+                          <h4 class="font-black text-xl text-emerald-600 tracking-tight mt-0.5">₱${periodTotalSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
+                      </div>
+                  </div>
+                  
+                  <div class="relative z-10 mb-5">
+                      <div class="flex justify-between items-end mb-1.5">
+                          <span class="font-black text-lg ${pctAchieved >= 100 ? 'text-emerald-500' : 'text-slate-800'}">${rawPct}%</span>
+                          <span class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">${remainingDays > 0 ? `<i class="fa-regular fa-clock text-amber-500 mr-1"></i> <span class="text-amber-600 font-black">${remainingDays}</span> Days Left` : 'Period Ended'}</span>
+                      </div>
+                      <div class="w-full bg-slate-100 rounded-full h-2 shadow-inner overflow-hidden border border-slate-200/50">
+                          <div class="${barColor} h-2 rounded-full transition-all duration-1000" style="width: ${pctAchieved}%"></div>
+                      </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 relative z-10">
+                      <div class="bg-red-50 p-3 rounded-xl border border-red-100 flex justify-between items-center">
+                          <div>
+                              <p class="text-[8px] font-black uppercase text-red-500 tracking-widest mb-0.5">Deficit</p>
+                              <h5 class="font-black text-xs text-red-600 tracking-tight">₱${remainingSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h5>
+                          </div>
+                      </div>
+                      <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 flex justify-between items-center">
+                          <div>
+                              <p class="text-[8px] font-black uppercase text-blue-500 tracking-widest mb-0.5">Required/Day</p>
+                              <h5 class="font-black text-xs ${pctAchieved >= 100 ? 'text-emerald-500' : 'text-blue-600'} tracking-tight">${pctAchieved >= 100 ? 'SECURED' : (remainingDays > 0 ? `₱${dailyRequired.toLocaleString(undefined, {minimumFractionDigits: 2})}` : 'NO TIME')}</h5>
+                          </div>
+                      </div>
+                      <div class="${trajBg} p-3 rounded-xl border flex justify-between items-center">
+                          <div>
+                              <p class="text-[8px] font-black uppercase ${trajColor} tracking-widest mb-0.5">Trajectory</p>
+                              <h5 class="font-black text-xs ${trajColor} tracking-tight">₱${projectedTotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</h5>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          `;
+      } else if (outletQuotaDiv && !isGodView) {
+          // NEW: Empty state for individual outlets
+          outletQuotaDiv.innerHTML = `
+              <div class="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-4 text-center flex items-center justify-center gap-3">
+                  <i class="fa-solid fa-store-slash text-slate-300 text-xl"></i>
+                  <div class="text-left">
+                      <h4 class="font-black text-slate-500 uppercase tracking-widest text-[10px]">No Outlet Quota Set</h4>
+                      <p class="text-[9px] font-bold text-slate-400 mt-0.5">Admin can assign a specific target for this outlet.</p>
+                  </div>
+              </div>
+          `;
+      } else if (outletQuotaDiv) {
+          outletQuotaDiv.innerHTML = '';
+      }
 
       let growthHTML = `<span class="text-slate-400 font-bold text-sm">No prior data</span>`;
       if (prevPeriodTotalSales > 0) {
@@ -2356,9 +2837,10 @@ else if (tx.displayType === 'INBOUND') {
       }
   };
 // --- PERFORMANCE MATRIX ENGINE ---
-// --- PERFORMANCE MATRIX ENGINE ---
   window.renderPerformanceMatrix = function() {
+
       const filterType = document.getElementById('rank-type-filter').value;
+      const filterTier = document.getElementById('rank-tier-filter') ? document.getElementById('rank-tier-filter').value : 'ALL';
       const regionContainer = document.getElementById('region-rankings-container');
       const storeContainer = document.getElementById('store-rankings-container');
 
@@ -2368,7 +2850,7 @@ else if (tx.displayType === 'INBOUND') {
           return;
       }
 
-      // --- THE FIX: GRAB THE GLOBAL CALENDAR MONTH ---
+      // GRAB THE GLOBAL CALENDAR MONTH
       const monthVal = document.getElementById('global-month-filter').value;
       let startDateStr = ""; let endDateStr = "";
       if(monthVal) {
@@ -2380,12 +2862,13 @@ else if (tx.displayType === 'INBOUND') {
       let regionData = {};
       let storeData = {};
 
-      // 1. Group and Sum the Data
       window.GLOBAL_TRANSACTIONS.forEach(tx => {
-          // ONLY count Actual Gross Sales
-          if (tx.record_type !== 'SALE') return;
+    if (tx.is_voided) return; // <--- PASTE IT EXACTLY HERE
+    
+    if (tx.record_type !== 'SALE') return; // ONLY count Actual Gross Sales
+    
+    // TIME BLINDER: Ignore records outside of the currently selected month!
 
-          // THE TIME BLINDER: Ignore records outside of the currently selected month!
           const txDate = tx.timestamp.substring(0, 10);
           if (startDateStr && endDateStr && (txDate < startDateStr || txDate > endDateStr)) return;
 
@@ -2394,38 +2877,72 @@ else if (tx.displayType === 'INBOUND') {
           
           const val = parseFloat(tx.val) || 0;
           
-          if (!regionData[tx.region]) regionData[tx.region] = 0;
-          regionData[tx.region] += val;
+          const normRegion = window.normalizeRegion(tx.region);
+          if (!regionData[normRegion]) regionData[normRegion] = 0;
+          regionData[normRegion] += val;
 
           if (!storeData[tx.store]) storeData[tx.store] = 0;
           storeData[tx.store] += val;
       });
 
-      // 2. Sort the Data (Highest to Lowest)
-      const sortedRegions = Object.keys(regionData).map(k => ({ name: k, total: regionData[k] })).sort((a, b) => b.total - a.total);
-      const sortedStores = Object.keys(storeData).map(k => ({ name: k, total: storeData[k] })).sort((a, b) => b.total - a.total);
+      // 2. Apply Tier Filtering strictly to Stores
+      let filteredStores = [];
+      Object.keys(storeData).forEach(storeName => {
+          const total = storeData[storeName];
+          let storeQuota = 0;
+          
+          // Fetch the store's quota for the currently viewed month
+          if (window.MASTER_DATA && window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[monthVal] && window.MASTER_DATA.quotas[monthVal][storeName]) {
+              storeQuota = parseFloat(window.MASTER_DATA.quotas[monthVal][storeName]) || 0;
+          }
+          
+          // 🚨 NEW: Fetch limits dynamically from the UI
+      const tier1Min = parseFloat(document.getElementById('tier1-min').value) || 500000;
+      const tier2Min = parseFloat(document.getElementById('tier2-min').value) || 150000;
 
-      // 3. Render Modern Leaderboard HTML
-      function buildRankHTML(arr, iconColor) {
-          if (arr.length === 0) return `<p class="text-center text-xs font-bold text-slate-400 italic py-4">No matching data for this month.</p>`;
+      let matchesTier = false;
+      if (filterTier === "ALL") matchesTier = true;
+      else if (filterTier === "TIER1" && storeQuota >= tier1Min) matchesTier = true;
+      else if (filterTier === "TIER2" && storeQuota >= tier2Min && storeQuota < tier1Min) matchesTier = true;
+      else if (filterTier === "TIER3" && storeQuota > 0 && storeQuota < tier2Min) matchesTier = true;
+      else if (filterTier === "NO_QUOTA" && storeQuota === 0) matchesTier = true;
+
+          if (matchesTier) {
+              filteredStores.push({ name: storeName, total: total, quota: storeQuota });
+          }
+      });
+
+      // 3. Sort the Data (Highest to Lowest)
+      const sortedRegions = Object.keys(regionData).map(k => ({ name: k, total: regionData[k] })).sort((a, b) => b.total - a.total);
+      const sortedStores = filteredStores.sort((a, b) => b.total - a.total);
+
+      // 4. Render Modern Leaderboard HTML
+      function buildRankHTML(arr, iconColor, isStore) {
+          if (arr.length === 0) return `<p class="text-center text-xs font-bold text-slate-400 italic py-4">No matching data for this filter.</p>`;
           let maxVal = arr[0].total; 
           
-          return arr.slice(0, 5).map((item, index) => {
+          return arr.slice(0, 10).map((item, index) => { // Top 10 layout
               let width = (item.total / maxVal) * 100;
               
               // Custom Badges for Top 3
-              let rankBadge = `<div class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xs font-black mr-4 border border-slate-200">${index + 1}</div>`;
-              if (index === 0) rankBadge = `<div class="w-8 h-8 rounded-full bg-amber-400 text-amber-900 flex items-center justify-center text-xs font-black mr-4 shadow-md shadow-amber-400/40 border border-amber-300"><i class="fa-solid fa-crown text-[10px]"></i></div>`;
-              else if (index === 1) rankBadge = `<div class="w-8 h-8 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs font-black mr-4 shadow-sm border border-slate-400">2</div>`;
-              else if (index === 2) rankBadge = `<div class="w-8 h-8 rounded-full bg-orange-300 text-orange-900 flex items-center justify-center text-xs font-black mr-4 shadow-sm border border-orange-400">3</div>`;
+              let rankBadge = `<div class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-xs font-black mr-4 border border-slate-200 shrink-0">${index + 1}</div>`;
+              if (index === 0) rankBadge = `<div class="w-8 h-8 rounded-full bg-amber-400 text-amber-900 flex items-center justify-center text-xs font-black mr-4 shadow-md shadow-amber-400/40 border border-amber-300 shrink-0"><i class="fa-solid fa-crown text-[10px]"></i></div>`;
+              else if (index === 1) rankBadge = `<div class="w-8 h-8 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs font-black mr-4 shadow-sm border border-slate-400 shrink-0">2</div>`;
+              else if (index === 2) rankBadge = `<div class="w-8 h-8 rounded-full bg-orange-300 text-orange-900 flex items-center justify-center text-xs font-black mr-4 shadow-sm border border-orange-400 shrink-0">3</div>`;
+
+              // Show the Quota Tag on the Stores list
+              let quotaTag = '';
+              if (isStore) {
+                  quotaTag = `<span class="text-[9px] font-bold text-slate-400 ml-2 border border-slate-200 rounded px-1.5 py-0.5">${item.quota > 0 ? 'TGT: ₱' + (item.quota/1000).toFixed(0) + 'k' : 'NO TGT'}</span>`;
+              }
 
               return `
               <div class="flex items-center mb-3 bg-white border border-slate-100 p-4 rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow">
                   ${rankBadge}
-                  <div class="flex-1">
+                  <div class="flex-1 min-w-0">
                       <div class="flex justify-between items-center mb-2">
-                          <span class="text-sm font-black text-slate-800 tracking-tight">${item.name}</span>
-                          <span class="text-sm font-black text-${iconColor}-600">₱${item.total.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                          <span class="text-sm font-black text-slate-800 tracking-tight truncate pr-2">${item.name} ${quotaTag}</span>
+                          <span class="text-sm font-black text-${iconColor}-600 shrink-0">₱${item.total.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                       </div>
                       <div class="w-full bg-slate-50 rounded-full h-1.5 overflow-hidden">
                           <div class="bg-${iconColor}-500 h-1.5 rounded-full transition-all duration-1000" style="width: ${width}%"></div>
@@ -2436,10 +2953,9 @@ else if (tx.displayType === 'INBOUND') {
       }
 
       // Inject into the screen
-      regionContainer.innerHTML = buildRankHTML(sortedRegions, "emerald");
-      storeContainer.innerHTML = buildRankHTML(sortedStores, "blue");
+      regionContainer.innerHTML = buildRankHTML(sortedRegions, "emerald", false);
+      storeContainer.innerHTML = buildRankHTML(sortedStores, "blue", true);
   };
-  // --- START THE ENGINES ---
   // --- USER AUTHENTICATION & SECURITY ENGINE ---
   window.CURRENT_USER = null;
 
@@ -2600,7 +3116,7 @@ function applyRoleRestrictions() {
           regSelect.disabled = false;
           window.showTab('dash', document.getElementById('nav-dash'));
       }
-      // 4. REGIONAL SUPERVISOR / MANAGER CHECK
+     // 4. REGIONAL SUPERVISOR / MANAGER CHECK
       else if (role === "Regional Supervisor" || role === "Regional Manager") {
           document.getElementById('nav-dash').style.display = 'none';
           document.getElementById('nav-rank').style.display = 'none';
@@ -2611,27 +3127,42 @@ function applyRoleRestrictions() {
           
           setTimeout(() => {
               if (region.toLowerCase() === "visayas") {
-                  // VISAYAS MULTI-TERRITORY LOGIC! 
-                  // Unlocks the dropdown but HIDES everything except Tacloban, Iloilo, and Cebu
+                  // THE VISAYAS MASTER FOLDER LOGIC
                   regSelect.disabled = false;
+                  
                   Array.from(regSelect.options).forEach(opt => {
                       const val = opt.value.toLowerCase();
-                      if(!val.includes('tacloban') && !val.includes('iloilo') && !val.includes('cebu') && val !== '') {
+                      // Only allow Visayas, Cebu, Iloilo, and Tacloban to exist in the dropdown
+                      if(val !== 'visayas' && val !== 'cebu' && val !== 'iloilo' && val !== 'tacloban' && val !== '') {
                           opt.style.display = 'none';
+                          opt.disabled = true; 
                       } else {
                           opt.style.display = '';
+                          opt.disabled = false;
                       }
                   });
+                  
+                  // Force the dropdown to start on the Visayas Summary!
+                  regSelect.value = "Visayas";
+                  window.renderRegionalDrilldown();
+                  
               } else {
-                  // STANDARD REGIONAL LOCK (Locks them to their 1 specific region)
+                  // STANDARD REGIONAL LOCK (Locks standard managers to their 1 specific region)
                   regSelect.value = region;
                   regSelect.disabled = true;
+                  
+                  // Failsafe: If the dropdown didn't render fast enough, force the option
+                  if(regSelect.value !== region) {
+                      regSelect.innerHTML += `<option value="${region}">${region}</option>`;
+                      regSelect.value = region;
+                  }
+                  
                   window.renderRegionalDrilldown();
               }
           }, 1500); 
 
           window.showTab('regions', document.getElementById('nav-regions'));
-      } 
+      }
       // 5. GLOBAL ACCESS ROLES
       else {
           // Applies to: Board of Director, Manufacturing, Supply Chain, Warehouse Manager, Admin
@@ -2826,7 +3357,7 @@ window.searchAdminDirectories = function() {
       });
   };
 
-  window.renderAdminDirectories = function(data) {
+window.renderAdminDirectories = function(data) {
       const usersTbody = document.getElementById('admin-users-tbody');
       const skusTbody = document.getElementById('admin-skus-tbody');
       const outletsTbody = document.getElementById('admin-outlets-tbody');
@@ -2861,12 +3392,55 @@ window.searchAdminDirectories = function() {
       
       if(regionsTbody && data.regions) {
           regionsTbody.innerHTML = data.regions.map(r => `<tr class="hover:bg-slate-50 border-b border-slate-50"><td class="px-4 py-3 font-black text-slate-700">${r}</td><td class="px-4 py-3 text-right"><button type="button" onclick="window.deleteAdminItem('region', '${r}')" class="text-red-400 hover:text-red-600 bg-red-50 w-8 h-8 rounded-lg transition-colors"><i class="fa-solid fa-trash text-[10px]"></i></button></td></tr>`).join('');
+          
+          const quotaList = document.getElementById('quota-target-list');
+        if(quotaList) {
+            let optHTML = `<option value="GLOBAL">★ OVERALL NATIONWIDE TARGET ★</option>`;
+            data.regions.forEach(r => optHTML += `<option value="REGION: ${r}">`);
+            data.business_types.forEach(t => optHTML += `<option value="TYPE: ${t}">`); // 🚨 NEW Bulk Selection
+            if (data.outlets) {
+                Object.keys(data.outlets).sort().forEach(o => optHTML += `<option value="${o}">`);
+            }
+            quotaList.innerHTML = optHTML;
+        }
+          
+          const todayStr = new Date().toISOString().substring(0,7);
+          if(!document.getElementById('admin-quota-view-month').value) document.getElementById('admin-quota-view-month').value = todayStr;
+          if(!document.getElementById('quota-month').value) document.getElementById('quota-month').value = todayStr;
+          
+          window.renderQuotaList(); 
       }
+
       if(typesTbody && data.business_types) {
           typesTbody.innerHTML = data.business_types.map(t => `<tr class="hover:bg-slate-50 border-b border-slate-50"><td class="px-4 py-3 font-black text-slate-700">${t}</td><td class="px-4 py-3 text-right"><button type="button" onclick="window.deleteAdminItem('type', '${t}')" class="text-red-400 hover:text-red-600 bg-red-50 w-8 h-8 rounded-lg transition-colors"><i class="fa-solid fa-trash text-[10px]"></i></button></td></tr>`).join('');
       }
   };
 
+ window.renderQuotaList = function() {
+      const listContainer = document.getElementById('admin-quotas-list');
+      const viewMonth = document.getElementById('admin-quota-view-month').value;
+      if(!listContainer || !window.MASTER_DATA) return;
+      
+      const quotasObj = (window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[viewMonth]) ? window.MASTER_DATA.quotas[viewMonth] : {};
+      
+      if (Object.keys(quotasObj).length === 0) {
+          listContainer.innerHTML = `<div class="col-span-full text-center py-6 bg-slate-50 rounded-xl border border-slate-200 border-dashed"><p class="text-xs font-bold text-slate-400 italic">No targets set for ${viewMonth}.</p></div>`;
+          return;
+      }
+      
+      listContainer.innerHTML = Object.keys(quotasObj).sort((a,b) => a === 'GLOBAL' ? -1 : 1).map(r => `
+          <div class="${r === 'GLOBAL' ? 'bg-emerald-50 border-emerald-200 col-span-full' : 'bg-white border-slate-200'} p-4 rounded-xl border flex justify-between items-center group shadow-sm transition-all hover:shadow-md hover:border-amber-400">
+              <div class="truncate pr-4">
+                  <p class="text-[9px] font-black ${r === 'GLOBAL' ? 'text-emerald-500' : 'text-slate-400'} uppercase tracking-widest truncate">${r === 'GLOBAL' ? '<i class="fa-solid fa-crown mr-1"></i> NATIONWIDE TARGET' : r}</p>
+                  <p class="font-black ${r === 'GLOBAL' ? 'text-emerald-700 text-xl' : 'text-slate-700 text-lg'} mt-0.5 tracking-tight">₱${parseFloat(quotasObj[r]).toLocaleString(undefined, {minimumFractionDigits:2})}</p>
+              </div>
+              <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2 shrink-0">
+                  <button type="button" onclick="document.getElementById('quota-month').value='${viewMonth}'; document.getElementById('quota-target-input').value='${r.replace(/'/g, "\\'")}'; document.getElementById('quota-amount').value='${quotasObj[r]}'; document.getElementById('quota-amount').focus();" class="w-8 h-8 rounded-full bg-white text-blue-500 shadow border border-blue-100 hover:bg-blue-500 hover:text-white transition-colors flex items-center justify-center"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                  <button type="button" onclick="window.deleteAdminItem('quota', '${r.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-full bg-white text-red-500 shadow border border-red-100 hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center"><i class="fa-solid fa-trash text-[10px]"></i></button>
+              </div>
+          </div>
+      `).join('');
+  };
  // NEW: Search Hub Outlets Engine
   window.searchHubOutlets = function() {
       const query = document.getElementById('hub-search').value.toLowerCase();
@@ -2913,6 +3487,10 @@ try {
           else if(type === 'outlet') updateData[`outlets.${id}`] = deleteField();
           else if(type === 'region') updateData[`regions`] = arrayRemove(id);
           else if(type === 'type') updateData[`business_types`] = arrayRemove(id);
+          else if(type === 'quota') {
+              const viewMonth = document.getElementById('admin-quota-view-month').value;
+              updateData[`quotas.${viewMonth}.${id}`] = deleteField();
+          }
           
           await updateDoc(masterRef, updateData);
          
@@ -3054,42 +3632,44 @@ window.promptDeleteTx = function(id) {
   };
   
 window.executeDeleteTx = async function(id) {
-      const approver = document.getElementById('modal-approver').value;
-      const inputKey = document.getElementById('modal-delete-tx-key').value;
-      const dbKey = (window.MASTER_DATA && window.MASTER_DATA.delete_key) ? window.MASTER_DATA.delete_key : "milfon080798";
+    const approver = document.getElementById('modal-approver').value;
+    const inputKey = document.getElementById('modal-delete-tx-key').value;
+    const dbKey = (window.MASTER_DATA && window.MASTER_DATA.delete_key) ? window.MASTER_DATA.delete_key : "milfon080798";
 
-      if(!approver) { window.showToast("Approver name is strictly required.", "warning"); return; }
-      if(inputKey !== dbKey) { window.showToast("ACCESS DENIED: Incorrect Passkey.", "error"); return; }
+    if(!approver) { window.showToast("Approver name is strictly required.", "warning"); return; }
+    if(inputKey !== dbKey) { window.showToast("ACCESS DENIED: Incorrect Passkey.", "error"); return; }
 
-      try { 
-          const tx = window.GLOBAL_TRANSACTIONS.find(t => t.id === id);
-          if (!tx) return;
+    try { 
+        const tx = window.GLOBAL_TRANSACTIONS.find(t => t.id === id);
+        if (!tx) return;
 
-          const batch = writeBatch(db);
-          
-          // 1. Delete Ledger Row
-          const ledgerRef = doc(db, "transaction_ledger", id);
-          batch.delete(ledgerRef);
+        const batch = writeBatch(db);
+        
+        // 1. SOFT DELETE: Mark as VOIDED instead of deleting
+        const ledgerRef = doc(db, "transaction_ledger", id);
+        batch.update(ledgerRef, {
+            audit: "VOIDED",
+            remarks: `[VOIDED by ${approver}] ` + (tx.remarks || ''),
+            is_voided: true
+        });
 
-          // 2. Compensating Math for Running Tally
-          const masterStockRef = doc(db, "inventory", "live_stock");
-          const qty = parseFloat(tx.qty) || 0;
+        // 2. Compensating Math for Running Tally
+        const masterStockRef = doc(db, "inventory", "live_stock");
+        const qty = parseFloat(tx.qty) || 0;
 
-          if (tx.record_type === 'SALE' || tx.record_type === 'BO') {
-              // Reversing a deduction -> ADD it back
-              batch.set(masterStockRef, { [tx.sku]: increment(qty) }, { merge: true });
-          } else if (tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN') {
-              // Reversing an addition -> SUBTRACT it
-              batch.set(masterStockRef, { [tx.sku]: increment(-qty) }, { merge: true });
-          }
+        if (tx.record_type === 'SALE' || tx.record_type === 'BO') {
+            batch.set(masterStockRef, { [tx.sku]: increment(qty) }, { merge: true });
+        } else if (tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN') {
+            batch.set(masterStockRef, { [tx.sku]: increment(-qty) }, { merge: true });
+        }
 
-          await batch.commit();
+        await batch.commit();
 
-          window.showToast(`Record wiped. Tally adjusted automatically. Auth: ${approver}`, "success"); 
-          closeModal(); 
-      } 
-      catch(e) { window.showToast("Error wiping record.", "error"); }
-  };
+        window.showToast(`Record VOIDED. History kept. Auth: ${approver}`, "success"); 
+        closeModal(); 
+    } 
+    catch(e) { window.showToast("Error wiping record.", "error"); }
+};
 
   window.promptEditTx = function(id) {
       const tx = window.GLOBAL_TRANSACTIONS.find(t => t.id === id);
@@ -3116,45 +3696,63 @@ window.executeDeleteTx = async function(id) {
   };
 
 window.executeEditTx = async function(id) {
-      const app = document.getElementById('modal-tx-app').value;
-      if(!app) { window.showToast("Approver name required to edit ledger.", "error"); return; }
-      
-      const nSku = document.getElementById('modal-tx-sku').value;
-      const nQty = parseFloat(document.getElementById('modal-tx-qty').value) || 0;
-      const nVal = parseFloat(document.getElementById('modal-tx-val').value) || 0;
-      
-      try { 
-          const tx = window.GLOBAL_TRANSACTIONS.find(t => t.id === id);
-          if (!tx) return;
+    const app = document.getElementById('modal-tx-app').value;
+    if(!app) { window.showToast("Approver name required to edit ledger.", "error"); return; }
+    
+    const nSku = document.getElementById('modal-tx-sku').value;
+    const nQty = parseFloat(document.getElementById('modal-tx-qty').value) || 0;
+    const nVal = parseFloat(document.getElementById('modal-tx-val').value) || 0;
+    
+    try { 
+        const tx = window.GLOBAL_TRANSACTIONS.find(t => t.id === id);
+        if (!tx) return;
 
-          const batch = writeBatch(db);
-          
-          // 1. Update Ledger Row
-          const ledgerRef = doc(db, "transaction_ledger", id);
-          batch.update(ledgerRef, { sku: nSku, qty: nQty, val: nVal });
+        const batch = writeBatch(db);
+        const ledgerRef = doc(db, "transaction_ledger", id);
 
-          // 2. Delta Math for Running Tally
-          if (tx.sku === nSku) {
-              const oldQty = parseFloat(tx.qty) || 0;
-              const delta = nQty - oldQty; 
-              
-              if (delta !== 0) {
-                  const masterStockRef = doc(db, "inventory", "live_stock");
-                  if (tx.record_type === 'SALE' || tx.record_type === 'BO') {
-                      batch.set(masterStockRef, { [tx.sku]: increment(-delta) }, { merge: true });
-                  } else if (tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN') {
-                      batch.set(masterStockRef, { [tx.sku]: increment(delta) }, { merge: true });
-                  }
-              }
-          }
+        // 1. VOID THE OLD RECORD (History Tracking)
+        batch.update(ledgerRef, {
+            audit: "OVERWRITTEN",
+            remarks: `[EDITED by ${app}] ` + (tx.remarks || ''),
+            is_voided: true
+        });
 
-          await batch.commit();
+        // 2. CREATE THE NEW CORRECTED RECORD
+        const newRef = doc(collection(db, "transaction_ledger"));
+        batch.set(newRef, {
+            ...tx,
+            sku: nSku,
+            qty: nQty,
+            val: nVal,
+            audit: "VERIFIED",
+            remarks: `[CORRECTED ENTRY]`,
+            is_voided: false
+        });
 
-          window.showToast(`Ledger overridden. Tally updated. Auth: ${app}`, "success"); 
-          closeModal(); 
-      } catch(e) { window.showToast("Error editing ledger.", "error"); }
-  };
+        // 3. FIX THE LIVE INVENTORY TALLY
+        const masterStockRef = doc(db, "inventory", "live_stock");
+        const oldQty = parseFloat(tx.qty) || 0;
+        
+        // Reverse old
+        if (tx.record_type === 'SALE' || tx.record_type === 'BO') {
+            batch.set(masterStockRef, { [tx.sku]: increment(oldQty) }, { merge: true });
+        } else if (tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN') {
+            batch.set(masterStockRef, { [tx.sku]: increment(-oldQty) }, { merge: true });
+        }
 
+        // Apply new
+        if (tx.record_type === 'SALE' || tx.record_type === 'BO') {
+            batch.set(masterStockRef, { [nSku]: increment(-nQty) }, { merge: true });
+        } else if (tx.record_type === 'INBOUND' || tx.record_type === 'MANUAL_IN') {
+            batch.set(masterStockRef, { [nSku]: increment(nQty) }, { merge: true });
+        }
+
+        await batch.commit();
+
+        window.showToast(`Ledger overwritten. Old record kept for history.`, "success"); 
+        closeModal(); 
+    } catch(e) { window.showToast("Error editing ledger.", "error"); }
+};
 </script>
 
 <script>
