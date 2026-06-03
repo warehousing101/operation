@@ -223,9 +223,12 @@
         </div>
     </div>
 
-    <div class="bg-slate-50 border border-slate-200 rounded-lg flex items-center px-2 py-1.5 md:px-3 shadow-inner">
-        <i class="fa-solid fa-calendar-days text-blue-600 ml-1 mr-2 md:ml-2 md:mr-3 text-sm"></i>
-        <input type="month" id="global-month-filter" onchange="window.syncGlobalMonth()" onclick="this.showPicker()" class="bg-transparent border-none outline-none font-black text-slate-700 text-xs md:text-sm cursor-pointer w-32 md:w-auto">
+    <div class="bg-slate-50 border border-slate-200 rounded-lg flex items-center shadow-inner overflow-hidden">
+        <select id="global-time-mode" onchange="window.syncGlobalMonth()" class="bg-slate-200 border-none outline-none font-black text-slate-700 text-xs py-2 px-3 cursor-pointer hover:bg-slate-300 transition-colors">
+            <option value="MONTH">Month</option>
+            <option value="YTD">YTD</option>
+        </select>
+        <input type="month" id="global-month-filter" onchange="window.syncGlobalMonth()" onclick="this.showPicker()" class="bg-transparent border-none outline-none font-black text-slate-700 text-xs md:text-sm cursor-pointer px-3 py-1.5 w-32 md:w-auto">
     </div>
     
     <button onclick="exportToCSV()" class="px-3 md:px-4 py-2 bg-slate-900 text-white font-bold text-xs rounded-lg hover:bg-emerald-600 transition-colors shadow-sm">
@@ -415,8 +418,8 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    <div class="lg:col-span-1 glass-card p-4 h-[350px] lg:h-[750px] flex flex-col">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+                    <div class="lg:col-span-1 glass-card p-4 h-[350px] lg:h-[calc(100vh-140px)] flex flex-col sticky top-4 z-20">
                         <h4 class="font-black text-slate-800 text-xs uppercase tracking-widest mb-4 px-2">Registered Outlets</h4>
                         
                         <div class="relative mb-4 px-2">
@@ -429,7 +432,7 @@
                         </div>
                     </div>
 
-                    <div class="lg:col-span-3 glass-card p-6 h-[750px] flex flex-col relative overflow-hidden bg-slate-50" id="outlet-dashboard-view">
+                   <div class="lg:col-span-3 glass-card p-6 min-h-[750px] h-auto flex flex-col relative overflow-hidden bg-slate-50" id="outlet-dashboard-view">
                         <div id="outlet-empty-state" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-30 flex flex-col items-center justify-center">
                             <i class="fa-solid fa-store text-4xl text-slate-300 mb-3"></i>
                             <p class="font-bold text-slate-500">Select an outlet from the left to view analytics.</p>
@@ -447,14 +450,19 @@
                                     <span class="text-[9px] font-black text-slate-400 ml-2 mr-1 uppercase tracking-widest">To</span>
                                     <input type="date" id="dash-end-date" onchange="refreshOutletDashboard()" class="bg-transparent border-none outline-none font-bold text-slate-700 text-xs cursor-pointer mr-1">
                                 </div>
-                                <div class="text-right border-l border-slate-200 pl-4">
-                                    <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Period Gross</p>
-                                    <h4 id="dash-outlet-sales" class="text-xl font-black text-emerald-600 tracking-tight">₱0.00</h4>
+                               <div class="flex items-center gap-4 border-l border-slate-200 pl-4 ml-2">
+                                    <div class="text-right hidden sm:block">
+                                        <p class="text-[9px] font-black uppercase tracking-widest text-amber-500">Stock Value</p>
+                                        <h4 id="dash-outlet-stock-value" class="text-xl font-black text-amber-600 tracking-tight">₱0.00</h4>
+                                    </div>
+                                    <div class="text-right border-l sm:border-slate-200 sm:pl-4">
+                                        <p class="text-[9px] font-black uppercase tracking-widest text-slate-400">Period Gross</p>
+                                        <h4 id="dash-outlet-sales" class="text-xl font-black text-emerald-600 tracking-tight">₱0.00</h4>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4">
+                        <div class="flex-1 space-y-6 mt-4">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                                     <div>
@@ -510,21 +518,35 @@
                                 </table>
                             </div>
 
-                            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-                                <div class="px-4 py-3 border-b border-slate-100 bg-slate-50"><h4 class="font-black text-[10px] uppercase text-slate-500 tracking-widest flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span> Daily Activity Ledger</h4></div>
-                                <table class="w-full text-left">
-                                    <thead class="bg-white text-[9px] font-black uppercase text-slate-400 border-b border-slate-100">
-                                        <tr>
-                                            <th class="px-4 py-2">Time</th>
-                                            <th class="px-4 py-2">Product</th>
-                                            <th class="px-4 py-2">Staff / Cashier</th>
-                                            <th class="px-4 py-2 text-center">Qty</th>
-                                            <th class="px-4 py-2 text-right">Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="dash-outlet-activity" class="divide-y divide-slate-50 text-xs"></tbody>
-                               
-</table>
+                            <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
+                                <div class="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center gap-4">
+                                    <h4 class="font-black text-[10px] uppercase text-slate-500 tracking-widest flex items-center gap-2 shrink-0"><span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Daily Activity Ledger</h4>
+                                    <div class="relative w-full max-w-[200px]">
+                                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[10px]"></i>
+                                        <input type="text" id="outlet-activity-search" onkeyup="window.searchOutletActivity()" placeholder="Search transactions..." class="w-full bg-white border border-slate-200 text-slate-700 pl-8 pr-3 py-1.5 rounded-lg font-bold text-[10px] outline-none focus:border-emerald-500 transition-colors shadow-sm">
+                                    </div>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left whitespace-nowrap">
+                                        <thead class="bg-white text-[9px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                                            <tr>
+                                                <th class="px-5 py-3">Time</th>
+                                                <th class="px-5 py-3">Product</th>
+                                                <th class="px-5 py-3">Staff / Cashier</th>
+                                                <th class="px-5 py-3 text-center">Qty</th>
+                                                <th class="px-5 py-3 text-right">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dash-outlet-activity" class="divide-y divide-slate-50 text-xs"></tbody>
+                                    </table>
+                                </div>
+                                <div class="p-3 border-t border-slate-100 flex justify-between items-center bg-slate-50/50">
+                                    <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest" id="outlet-activity-page-info">Page 1</p>
+                                    <div class="flex gap-2">
+                                        <button type="button" onclick="window.changeOutletActivityPage(-1)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-[10px] font-black text-slate-600 hover:bg-slate-100 transition-colors">&laquo; Prev</button>
+                                        <button type="button" onclick="window.changeOutletActivityPage(1)" class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm text-[10px] font-black text-slate-600 hover:bg-slate-100 transition-colors">Next &raquo;</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -958,6 +980,39 @@
             <div id="admin-quotas-list" class="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <p class="text-xs text-slate-400 italic col-span-full">Loading quotas...</p>
             </div>
+        </div>
+
+        <!-- 🚨 NEW: HISTORICAL SALES INJECTOR -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-t-4 border-rose-500 mt-6">
+            <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-clock-rotate-left text-rose-600 mr-2"></i> Inject Historical Gross Sales</h4>
+            <p class="text-[10px] font-bold text-slate-400 mb-6">Add raw revenue data for past months without affecting physical inventory counts.</p>
+            
+            <form onsubmit="injectHistoricalSales(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-rose-50/30 p-4 rounded-xl border border-rose-100/50">
+                <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Target Month</label><input type="month" id="hist-month" class="form-input bg-white cursor-pointer" required></div>
+                <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Region Hub</label><select id="hist-region" class="form-input bg-white" required><option value="Mega Manila">Mega Manila</option><option value="Visayas">Visayas</option><option value="DAVAO">DAVAO</option><option value="North Luzon">North Luzon</option></select></div>
+                <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Gross Revenue (₱)</label><input type="number" id="hist-amount" step="0.01" class="form-input bg-white" placeholder="e.g. 1500000" required></div>
+                <div><button type="submit" class="w-full py-4 bg-rose-500 text-white font-black rounded-xl text-xs shadow-md hover:bg-rose-600 uppercase tracking-widest transition-transform active:scale-95">Inject Revenue</button></div>
+            </form>
+
+            <div class="mt-8 mb-4 border-b border-slate-100 pb-2">
+                <h4 class="font-black text-slate-700 text-xs uppercase tracking-widest"><i class="fa-solid fa-list-ul text-rose-500 mr-2"></i>Injected Historical Records</h4>
+            </div>
+            <div class="overflow-y-auto custom-scrollbar max-h-[300px] border border-slate-100 rounded-xl">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-[9px] font-black uppercase text-slate-500 sticky top-0 shadow-sm">
+                        <tr>
+                            <th class="px-4 py-3">Target Month</th>
+                            <th class="px-4 py-3">Region Hub</th>
+                            <th class="px-4 py-3 text-right">Gross Revenue</th>
+                            <th class="px-4 py-3 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-historical-list" class="divide-y divide-slate-100">
+                        <tr><td colspan="4" class="text-center py-6 italic text-slate-400 font-bold text-[10px] uppercase">Loading records...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 </section>
@@ -1522,6 +1577,30 @@ window.addOutlet = async function(e) {
       } catch (error) { window.showToast("Error saving quota.", "error"); } finally { btn.innerHTML = origText; }
   };
 
+// 🚨 NEW: INJECT HISTORICAL SALES FUNCTION
+  window.injectHistoricalSales = async function(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button');
+      const monthVal = document.getElementById('hist-month').value; // 'YYYY-MM'
+      const region = document.getElementById('hist-region').value;
+      const amount = parseFloat(document.getElementById('hist-amount').value);
+      
+      const exactTime = `${monthVal}-28T23:59:00`; // Force it to the end of the selected month
+      const origText = btn.innerHTML; btn.innerHTML = `Injecting...`;
+
+      try {
+          await addDoc(collection(db, "transaction_ledger"), {
+              timestamp: exactTime, region: region, type: "HISTORICAL_SUMMARY", store: "N/A",
+              sku: "Historical Override", qty: 0, val: amount, remarks: `System Admin Manual Injection`, audit: "VERIFIED",
+              record_type: "HISTORICAL", dest_store: "", staff: window.CURRENT_USER.name, 
+              system_logged_at: serverTimestamp() 
+          });
+          
+          window.showToast(`Successfully injected ₱${amount.toLocaleString()} for ${region} in ${monthVal}!`, "success");
+          e.target.reset();
+      } catch (error) { window.showToast("Error injecting historical data.", "error"); } finally { btn.innerHTML = origText; }
+  };
+
   // --- REAL-TIME LEDGER & SEARCH ENGINE ---
   window.GLOBAL_TRANSACTIONS = []; 
 
@@ -1574,6 +1653,7 @@ window.addOutlet = async function(e) {
               if(window.renderRegionalDrilldown && document.getElementById('drilldown-region-select').value !== "") window.renderRegionalDrilldown();
               if(window.renderMasterInventory) window.renderMasterInventory(); 
               if(window.renderExecutiveDashboard) window.renderExecutiveDashboard(); 
+              if(window.renderHistoricalSalesList) window.renderHistoricalSalesList(); // 🚨 NEW: Auto-updates the historical list! 
           }
       });
   };
@@ -1615,17 +1695,22 @@ window.addOutlet = async function(e) {
 // --- EXECUTIVE DASHBOARD & VISUAL ENGINE ---
   window.DASH_CHARTS = {}; // Holds memory of charts so we can cleanly redraw them
 
-// NEW DATE SYNCER
-// RESTORED MONTH SYNCER
+// UPGRADED YTD & MONTH SYNCER
 window.syncGlobalMonth = async function() {
+      const mode = document.getElementById('global-time-mode').value;
       const monthVal = document.getElementById('global-month-filter').value; 
       if(!monthVal) return;
       const year = parseInt(monthVal.split('-')[0]); const month = parseInt(monthVal.split('-')[1]);
       
-      document.getElementById('dash-start-date').value = new Date(year, month - 1, 1).toLocaleDateString('en-CA'); 
-      document.getElementById('dash-end-date').value = new Date(year, month, 0).toLocaleDateString('en-CA');
+      if (mode === 'YTD') {
+          // 🚨 SMART YTD: Start at Jan 1st, End at the LAST DAY of the selected month!
+          document.getElementById('dash-start-date').value = new Date(year, 0, 1).toLocaleDateString('en-CA'); 
+          document.getElementById('dash-end-date').value = new Date(year, month, 0).toLocaleDateString('en-CA');
+      } else {
+          document.getElementById('dash-start-date').value = new Date(year, month - 1, 1).toLocaleDateString('en-CA'); 
+          document.getElementById('dash-end-date').value = new Date(year, month, 0).toLocaleDateString('en-CA');
+      }
 
-      // Trigger the dashboards to re-render using full memory calculation
       if(window.CURRENT_OUTLET && window.CURRENT_OUTLET.name) { window.refreshOutletDashboard(); }
       if(window.renderRegionalDrilldown) window.renderRegionalDrilldown(); 
       if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
@@ -1711,13 +1796,25 @@ window.syncGlobalMonth = async function() {
       if(!window.GLOBAL_TRANSACTIONS) return;
 
       const monthVal = document.getElementById('global-month-filter').value;
+      const mode = document.getElementById('global-time-mode') ? document.getElementById('global-time-mode').value : 'MONTH';
+      
       let startDateStr = ""; let endDateStr = "";
       
       if(monthVal) {
-          const year = parseInt(monthVal.split('-')[0]); const month = parseInt(monthVal.split('-')[1]);
-          startDateStr = new Date(year, month - 1, 1).toLocaleDateString('en-CA');
-          endDateStr = new Date(year, month, 0).toLocaleDateString('en-CA');
-          document.getElementById('dash-month-label').innerText = new Date(year, month - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
+          const year = parseInt(monthVal.split('-')[0]); 
+          const month = parseInt(monthVal.split('-')[1]);
+          
+          if (mode === 'YTD') {
+              // 🚨 SMART YTD: Cut off at the selected month!
+              startDateStr = new Date(year, 0, 1).toLocaleDateString('en-CA');
+              endDateStr = new Date(year, month, 0).toLocaleDateString('en-CA');
+              const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'short' });
+              document.getElementById('dash-month-label').innerText = `YTD (${monthName} ${year})`;
+          } else {
+              startDateStr = new Date(year, month - 1, 1).toLocaleDateString('en-CA');
+              endDateStr = new Date(year, month, 0).toLocaleDateString('en-CA');
+              document.getElementById('dash-month-label').innerText = new Date(year, month - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
+          }
       } else {
           const today = new Date();
           document.getElementById('global-month-filter').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
@@ -1725,28 +1822,43 @@ window.syncGlobalMonth = async function() {
       }
 
       let totalRev = 0; let productVol = {};
-      let dailyRev = {}; let regionRev = {}; 
+      let chartRev = {}; let regionRev = {}; 
       
       const startD = new Date(startDateStr); const endD = new Date(endDateStr);
-      // Stop drawing the chart line at today's date so it doesn't dive to zero
-const todayDate = new Date();
-const limitDate = (endD > todayDate) ? todayDate : endD;
-for(let d = new Date(startD); d <= limitDate; d.setDate(d.getDate()+1)) { dailyRev[d.toLocaleDateString('en-CA')] = 0; }
+      const todayDate = new Date();
+      const limitDate = (endD > todayDate) ? todayDate : endD;
+
+     // 🚨 DYNAMIC CHART AXIS: Render months up to the selected month
+      if (mode === 'YTD') {
+          const endMonth = endD.getMonth() + 1;
+          for(let m = 1; m <= endMonth; m++) { chartRev[`${startD.getFullYear()}-${String(m).padStart(2,'0')}`] = 0; }
+      } else {
+          for(let d = new Date(startD); d <= limitDate; d.setDate(d.getDate()+1)) { chartRev[d.toLocaleDateString('en-CA')] = 0; }
+      }
 
      window.GLOBAL_TRANSACTIONS.forEach(tx => {
-    if (tx.is_voided) return; // <--- PASTE IT EXACTLY HERE
-    
-    const txDate = tx.timestamp.substring(0, 10);
-    if(tx.record_type === 'SALE' && txDate >= startDateStr && txDate <= endDateStr) {
-
-              const val = parseFloat(tx.val) || 0; const qty = parseFloat(tx.qty) || 0;
+          if (tx.is_voided) return; 
+          
+          const txDate = tx.timestamp.substring(0, 10);
+          const tKey = mode === 'YTD' ? txDate.substring(0, 7) : txDate; // Month 'YYYY-MM' or Day 'YYYY-MM-DD'
+          
+          // 🚨 INCLUDE NEW HISTORICAL SALES IN REVENUE, BUT IGNORE IN INVENTORY
+          if((tx.record_type === 'SALE' || tx.record_type === 'HISTORICAL') && txDate >= startDateStr && txDate <= endDateStr) {
+              const val = parseFloat(tx.val) || 0; 
+              const qty = parseFloat(tx.qty) || 0;
+              
               totalRev += val; 
-              if(dailyRev[txDate] !== undefined) dailyRev[txDate] += val;
+              if(chartRev[tKey] !== undefined) chartRev[tKey] += val;
+              
               const normRegion = window.normalizeRegion(tx.region);
               if(!regionRev[normRegion]) regionRev[normRegion] = 0;
               regionRev[normRegion] += val;
-              if(!productVol[tx.sku]) productVol[tx.sku] = 0;
-              productVol[tx.sku] += qty;
+              
+              // Only chart real products, ignore ghost adjustments
+              if (tx.record_type === 'SALE') {
+                  if(!productVol[tx.sku]) productVol[tx.sku] = 0;
+                  productVol[tx.sku] += qty;
+              }
           }
       });
 
@@ -1822,13 +1934,33 @@ for(let d = new Date(startD); d <= limitDate; d.setDate(d.getDate()+1)) { dailyR
           reportDiv = document.createElement('div');
           reportDiv.id = 'national-sales-report';
           const topGrid = document.querySelector('#dash > .grid');
-          topGrid.insertAdjacentElement('afterend', reportDiv);
+          if (topGrid) topGrid.insertAdjacentElement('afterend', reportDiv);
       }
 
       let globalTarget = 0;
       let regionTargetsHTML = '';
-      
-      const currentMonthQuotas = (window.MASTER_DATA && window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[monthVal]) ? window.MASTER_DATA.quotas[monthVal] : {};
+      let currentMonthQuotas = {};
+
+      // 🚨 FIX 2: SMART YTD TARGET CALCULATOR
+      // If YTD is selected, sum up all quotas from Jan to the selected month
+      if (window.MASTER_DATA && window.MASTER_DATA.quotas) {
+          if (mode === 'YTD' && monthVal) {
+              const tgtYear = parseInt(monthVal.split('-')[0]);
+              const tgtMonth = parseInt(monthVal.split('-')[1]);
+              
+              for (let m = 1; m <= tgtMonth; m++) {
+                  const mKey = `${tgtYear}-${String(m).padStart(2, '0')}`;
+                  if (window.MASTER_DATA.quotas[mKey]) {
+                      Object.keys(window.MASTER_DATA.quotas[mKey]).forEach(k => {
+                          if (!currentMonthQuotas[k]) currentMonthQuotas[k] = 0;
+                          currentMonthQuotas[k] += parseFloat(window.MASTER_DATA.quotas[mKey][k]) || 0;
+                      });
+                  }
+              }
+          } else {
+              currentMonthQuotas = window.MASTER_DATA.quotas[monthVal] || {};
+          }
+      }
       
       if (Object.keys(currentMonthQuotas).length > 0) {
           globalTarget = parseFloat(currentMonthQuotas['GLOBAL']) || 0;
@@ -1880,7 +2012,7 @@ for(let d = new Date(startD); d <= limitDate; d.setDate(d.getDate()+1)) { dailyR
                               <p class="text-[10px] text-slate-300 font-bold uppercase tracking-widest mt-1">Aggregated Executive Target</p>
                           </div>
                           <div class="text-right w-full md:w-auto">
-                              <p class="text-[9px] uppercase tracking-widest text-slate-400 mb-1">Global Achievement vs Target</p>
+                              <p class="text-[9px] uppercase tracking-widest text-slate-400 mb-1">Nationwide Achievement vs Target</p>
                               <div class="flex items-center gap-4">
                                   <div class="text-right hidden md:block">
                                       <p class="text-xs font-bold text-slate-300">Target: ₱${globalTarget.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
@@ -1910,9 +2042,22 @@ for(let d = new Date(startD); d <= limitDate; d.setDate(d.getDate()+1)) { dailyR
                       </div>
                   </div>
               `;
-          } else { reportDiv.innerHTML = ''; }
-      } else { reportDiv.innerHTML = ''; }
-
+          } else { 
+              reportDiv.innerHTML = `
+                  <div class="glass-card overflow-hidden border border-slate-200 border-dashed mt-6 shadow-sm p-8 text-center bg-slate-50 flex flex-col items-center justify-center">
+                      <div class="w-16 h-16 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center mb-4"><i class="fa-solid fa-bullseye text-2xl"></i></div>
+                      <h4 class="font-black text-slate-500 uppercase tracking-widest text-sm">No National Target Set</h4>
+                      <p class="text-xs font-bold text-slate-400 mt-1">Please ask the System Admin to assign target quotas for this period.</p>
+                  </div>`;
+          }
+      } else { 
+          reportDiv.innerHTML = `
+              <div class="glass-card overflow-hidden border border-slate-200 border-dashed mt-6 shadow-sm p-8 text-center bg-slate-50 flex flex-col items-center justify-center">
+                  <div class="w-16 h-16 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center mb-4"><i class="fa-solid fa-bullseye text-2xl"></i></div>
+                  <h4 class="font-black text-slate-500 uppercase tracking-widest text-sm">No National Target Set</h4>
+                  <p class="text-xs font-bold text-slate-400 mt-1">Please ask the System Admin to assign target quotas for this period.</p>
+              </div>`;
+      }
 
     // TRIGGER THE SPECIFIC DATE ANALYZER!
       window.analyzeSpecificDate();
@@ -1922,14 +2067,14 @@ for(let d = new Date(startD); d <= limitDate; d.setDate(d.getDate()+1)) { dailyR
       Chart.defaults.color = '#94a3b8';
       Chart.defaults.font.weight = 'bold';
 
-      // CHART A: Revenue Line Chart
-      // CHART A: Revenue Line Chart (WITH TREND LINE)
+     // CHART A: Revenue Line Chart (WITH TREND LINE)
       const ctxRev = document.getElementById('chart-revenue');
       if(window.DASH_CHARTS['rev']) window.DASH_CHARTS['rev'].destroy();
       
       // Calculate Linear Regression for Trend Line
-      const n = Object.keys(dailyRev).length;
-      const yVals = Object.values(dailyRev);
+      const n = Object.keys(chartRev).length;
+      const yVals = Object.values(chartRev);
+
       let sumX=0, sumY=0, sumXY=0, sumXX=0;
       for(let i=0; i<n; i++) { sumX += i; sumY += yVals[i]; sumXY += i*yVals[i]; sumXX += i*i; }
       const slope = (n*sumXY - sumX*sumY) / ((n*sumXX - sumX*sumX) || 1);
@@ -1939,11 +2084,11 @@ for(let d = new Date(startD); d <= limitDate; d.setDate(d.getDate()+1)) { dailyR
       window.DASH_CHARTS['rev'] = new Chart(ctxRev, {
           type: 'line',
           data: {
-              labels: Object.keys(dailyRev).map(d => d.substring(8,10)), 
+              labels: mode === 'YTD' ? Object.keys(chartRev).map(m => new Date(m+'-01').toLocaleString('default', {month:'short'})) : Object.keys(chartRev).map(d => d.substring(8,10)), 
               datasets: [
                   {
                       label: 'Revenue',
-                      data: Object.values(dailyRev),
+                      data: Object.values(chartRev),
                       borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)',
                       borderWidth: 3, tension: 0.4, fill: true, pointRadius: 0, pointHitRadius: 20
                   },
@@ -1971,7 +2116,7 @@ for(let d = new Date(startD); d <= limitDate; d.setDate(d.getDate()+1)) { dailyR
       });
 
       // CHART C: Top Products Bar Chart
-      const topProds = Object.keys(productVol).map(k => ({name: k, vol: productVol[k]})).sort((a,b)=>b.vol-a.vol).slice(0,5);
+      const topProds = Object.keys(productVol).map(k => ({name: k, vol: productVol[k]})).sort((a,b)=>b.vol-a.vol); // 🚨 Removed .slice(0,5) to show ALL
       const ctxProd = document.getElementById('chart-products');
       if(window.DASH_CHARTS['prod']) window.DASH_CHARTS['prod'].destroy();
       window.DASH_CHARTS['prod'] = new Chart(ctxProd, {
@@ -2146,8 +2291,8 @@ let invData = {};
           // 4. Check Type
           if (filterType !== 'ALL' && tx.record_type !== filterType) return false;
 
-          // 5. Check Search Text
-          const searchString = `${tx.sku} ${tx.store} ${tx.region} ${tx.timestamp} ${tx.type} ${tx.record_type} ${tx.remarks||''}`.toLowerCase();
+          // 5. Check Search Text (NOW INCLUDES DESTINATION STORE)
+          const searchString = `${tx.sku} ${tx.store} ${tx.dest_store || ''} ${tx.region} ${tx.timestamp} ${tx.type} ${tx.record_type} ${tx.remarks||''}`.toLowerCase();
           return searchString.includes(queryText);
       });
       
@@ -2235,13 +2380,28 @@ let invData = {};
             valDisplay = `<span class="line-through opacity-50">${valDisplay}</span>`;
         }
 
+        let locationDisplay = `
+            <span class="font-black text-slate-800">${tx.store}</span><br>
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${tx.region} &bull; ${tx.type}</span>
+        `;
+
+        // Make origins and destinations incredibly clear
+        if (tx.dest_store) {
+            if (tx.record_type === 'INBOUND') {
+                locationDisplay = `
+                    <span class="text-[9px] font-black text-blue-500 uppercase tracking-widest"><i class="fa-solid fa-truck-ramp-box mx-1"></i> FROM: ${tx.dest_store}</span><br>
+                    ${locationDisplay}
+                `;
+            } else {
+                locationDisplay += `<br><span class="text-[9px] font-black text-purple-500 uppercase tracking-widest"><i class="fa-solid fa-arrow-right mx-1"></i> TO: ${tx.dest_store}</span>`;
+            }
+        }
+
         return `
         <tr class="hover:bg-slate-50 transition-colors">
             <td class="px-6 py-3 font-bold text-slate-500 whitespace-nowrap">${dt}</td>
             <td class="px-6 py-3 leading-tight">
-                <span class="font-black text-slate-800">${tx.store}</span><br>
-                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${tx.region} &bull; ${tx.type}</span>
-                ${tx.dest_store ? `<br><span class="text-[9px] font-black text-purple-500"><i class="fa-solid fa-arrow-right mx-1"></i> ${tx.dest_store}</span>` : ''}
+                ${locationDisplay}
             </td>
             ${personnelColumn}
             <td class="px-6 py-3 font-black text-blue-600">${tx.sku}</td>
@@ -2264,15 +2424,19 @@ let invData = {};
       const endD = document.getElementById('dash-end-date') ? document.getElementById('dash-end-date').value : "";
 
 let regionSales = 0; 
-      let typeSales = {}; // 🚨 NEW: Dynamic bucket for all business types
+      let typeSales = {}; 
+      let typeCounts = {}; // 🚨 NEW: Dynamic bucket to count stores per type
+      
       if (window.MASTER_DATA && window.MASTER_DATA.business_types) {
-          window.MASTER_DATA.business_types.forEach(t => typeSales[t] = 0);
+          window.MASTER_DATA.business_types.forEach(t => {
+              typeSales[t] = 0;
+              typeCounts[t] = 0;
+          });
       }
       
       let regionStores = [];
 
 // SMART GROUPING ENGINE:
-      // If Visayas is selected, grab Cebu, Iloilo, and Tacloban. Otherwise, be exact!
       const isTargetRegion = (dbRegion) => {
           if (!dbRegion) return false;
           if (selectedRegion === 'Visayas') {
@@ -2285,7 +2449,12 @@ let regionSales = 0;
       if (window.OUTLET_DATA) {
           Object.keys(window.OUTLET_DATA).forEach(storeName => {
               if (isTargetRegion(window.OUTLET_DATA[storeName].region)) { 
-                  regionStores.push({ name: storeName, type: window.OUTLET_DATA[storeName].type }); 
+                  const sType = window.OUTLET_DATA[storeName].type || "Uncategorized";
+                  regionStores.push({ name: storeName, type: sType }); 
+                  
+                  // Count how many stores exist for each specific business type
+                  if (typeCounts[sType] !== undefined) typeCounts[sType]++;
+                  else typeCounts[sType] = 1;
               }
           });
       }
@@ -2296,13 +2465,14 @@ let regionSales = 0;
           Object.keys(window.SKU_DATA).forEach(sku => regionInv[sku] = 0);
       }
 
-      window.GLOBAL_TRANSACTIONS.forEach(tx => {
+     window.GLOBAL_TRANSACTIONS.forEach(tx => {
           if (tx.is_voided) return; 
           
           const txDate = tx.timestamp.substring(0, 10);
           let isDateValid = (!startD || !endD) ? true : (txDate >= startD && txDate <= endD);
           
-          if (isTargetRegion(tx.region) && tx.record_type === 'SALE' && isDateValid) {
+          // 🚨 Include Historical Sales in Regional Overviews
+          if (isTargetRegion(tx.region) && (tx.record_type === 'SALE' || tx.record_type === 'HISTORICAL') && isDateValid) {
               const val = parseFloat(tx.val) || 0;
               regionSales += val;
               
@@ -2338,28 +2508,33 @@ let regionSales = 0;
           }
       });
 
-     // 🚨 DYNAMIC BOX BUILDER (Total Sales Removed)
+     // 🚨 DYNAMIC BOX BUILDER (Upgraded Uncrowded UI)
       let metricsHTML = `
-          <div class="px-4 py-2 bg-slate-50 rounded-xl border border-slate-100 shadow-sm flex flex-col items-center justify-center min-w-[100px] shrink-0">
-              <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Outlets</p>
-              <h4 class="font-black text-sm text-slate-700">${regionStores.length}</h4>
-          </div>
-          <div class="px-4 py-2 bg-amber-50 rounded-xl border border-amber-100 shadow-sm flex flex-col items-center justify-center min-w-[120px] shrink-0">
-              <p class="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-0.5">Stock Value</p>
-              <h4 class="font-black text-sm text-amber-700">₱${regionAssetValue.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
+          <div class="px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-100 shadow-sm flex flex-col min-w-[140px] shrink-0">
+              <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1 flex items-center justify-between">
+                  Total Gross
+                  <span class="bg-emerald-200 text-emerald-800 px-1.5 py-0.5 rounded-full ml-2" title="Total Active Stores">${regionStores.length}</span>
+              </p>
+              <h4 class="font-black text-sm text-emerald-700 tracking-tight">₱${regionSales.toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
           </div>
       `;
 
-      const colors = ['blue', 'purple', 'indigo', 'cyan', 'teal'];
+      const colors = ['blue', 'purple', 'amber', 'cyan', 'rose', 'indigo'];
       let cIdx = 0;
+      
       Object.keys(typeSales).forEach(t => {
-          // Only show boxes for active business types that exist in the system
-          if (typeSales[t] > 0 || (window.MASTER_DATA && window.MASTER_DATA.business_types.includes(t))) {
+          // 🚨 UI FIX: ONLY show the card if there is at least 1 store of this type in this region OR there are actual sales!
+          if (typeSales[t] > 0 || (typeCounts[t] && typeCounts[t] > 0)) {
               const c = colors[cIdx % colors.length];
+              const count = typeCounts[t] || 0;
+              
               metricsHTML += `
-              <div class="px-4 py-2 bg-${c}-50 rounded-xl border border-${c}-100 shadow-sm flex flex-col items-center justify-center min-w-[120px] shrink-0">
-                  <p class="text-[9px] font-black text-${c}-600 uppercase tracking-widest mb-0.5">${t}</p>
-                  <h4 class="font-black text-sm text-${c}-700">₱${typeSales[t].toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
+              <div class="px-4 py-2 bg-${c}-50 rounded-xl border border-${c}-100 shadow-sm flex flex-col min-w-[140px] shrink-0">
+                  <p class="text-[9px] font-black text-${c}-600 uppercase tracking-widest mb-1 flex items-center justify-between">
+                      <span class="truncate pr-1">${t}</span>
+                      <span class="bg-${c}-200 text-${c}-800 px-1.5 py-0.5 rounded-full shrink-0" title="Active Stores">${count}</span>
+                  </p>
+                  <h4 class="font-black text-sm text-slate-700 tracking-tight">₱${typeSales[t].toLocaleString(undefined, {minimumFractionDigits: 2})}</h4>
               </div>
               `;
               cIdx++;
@@ -2703,14 +2878,21 @@ window.GLOBAL_TRANSACTIONS.forEach(tx => {
           }
       });
 
-      // Calculate Ending Inventory
+      // Calculate Ending Inventory & Stock Value
+      let outletStockValue = 0;
       Object.keys(storeInventory).forEach(sku => {
           let s = storeInventory[sku];
           s.endInv = s.begInv + s.in - s.sold - s.bo - s.transferOut;
+          
+          if (s.endInv > 0 && window.SKU_DATA && window.SKU_DATA[sku]) {
+              outletStockValue += (s.endInv * parseFloat(window.SKU_DATA[sku].price));
+          }
       });
 
+      const stockValEl = document.getElementById('dash-outlet-stock-value');
+      if (stockValEl) stockValEl.innerText = `₱${outletStockValue.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      
       document.getElementById('dash-outlet-sales').innerText = `₱${periodTotalSales.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-
       // --- NEW: OUTLET-SPECIFIC SMART QUOTA WIDGET ---
       let outletQuotaDiv = document.getElementById('outlet-smart-quota-container');
       if (!outletQuotaDiv) {
@@ -2877,49 +3059,85 @@ window.GLOBAL_TRANSACTIONS.forEach(tx => {
               <td class="px-4 py-2 text-right border-l border-slate-100 font-black text-emerald-600">₱${s.sales.toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
           </tr>`;
       }).join('');
-      // RENDER ACTIVITY FEED
-      const actBody = document.getElementById('dash-outlet-activity');
-      if (periodTransactions.length === 0) {
-          actBody.innerHTML = `<tr><td colspan="4" class="px-4 py-6 text-center text-slate-400 font-bold uppercase text-[9px] italic">No activity recorded in this period.</td></tr>`;
-      } else {
-          periodTransactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-          actBody.innerHTML = periodTransactions.map(tx => {
-              const dt = new Date(tx.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
-              
-              let amountDisplay = `₱${parseFloat(tx.val).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-              let productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">SALE</span>`;
-              
-              if (tx.displayType === 'B.O.') {
-                  amountDisplay = `<span class="text-orange-400 italic text-[10px]">Disposed</span>`;
-                  productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-1.5 py-0.5 rounded bg-orange-100 text-orange-700">B.O.</span>`;
-              } else if (tx.displayType === 'TRANS-OUT') {
-                  amountDisplay = `<span class="text-purple-400 italic text-[10px]">To: ${tx.dest_store}</span>`;
-                  productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-1.5 py-0.5 rounded bg-purple-100 text-purple-700">SENT</span>`;
-              } else if (tx.displayType === 'TRANS-IN') {
-                  amountDisplay = `<span class="text-emerald-400 italic text-[10px]">From: ${tx.store}</span>`;
-                  productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">RCVD</span>`;
-              }
-else if (tx.displayType === 'INBOUND') {
-                  amountDisplay = `<span class="text-blue-400 italic text-[10px]">From: ${tx.dest_store}</span>`;
-                  productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">INBOUND</span>`;
-              }
-              else if (tx.displayType === 'MANUAL_RCV') {
-                  amountDisplay = `<span class="text-emerald-500 italic text-[10px]">Manual Entry</span>`;
-                  productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">RCVD</span>`;
-              }
+    // RENDER ACTIVITY FEED WITH PAGINATION AND SEARCH
+      window.CURRENT_OUTLET_TRANSACTIONS = periodTransactions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      window.OUTLET_ACTIVITY_FILTERED = [...window.CURRENT_OUTLET_TRANSACTIONS];
+      window.OUTLET_ACTIVITY_PAGE = 1;
+      
+      window.renderOutletActivityPage = function() {
+          const actBody = document.getElementById('dash-outlet-activity');
+          if (!actBody) return;
+          
+          const rowsPerPage = 15;
+          const totalPages = Math.ceil(window.OUTLET_ACTIVITY_FILTERED.length / rowsPerPage) || 1;
+          
+          if (window.OUTLET_ACTIVITY_PAGE > totalPages) window.OUTLET_ACTIVITY_PAGE = totalPages;
+          if (window.OUTLET_ACTIVITY_PAGE < 1) window.OUTLET_ACTIVITY_PAGE = 1;
 
-              const staffDisplay = tx.staff ? tx.staff : '<span class="text-slate-300 italic">System</span>';
+          const startIdx = (window.OUTLET_ACTIVITY_PAGE - 1) * rowsPerPage;
+          const pageData = window.OUTLET_ACTIVITY_FILTERED.slice(startIdx, startIdx + rowsPerPage);
 
-              return `
-              <tr class="hover:bg-slate-50 transition-colors">
-                  <td class="px-4 py-2 font-bold text-slate-500 whitespace-nowrap text-xs">${dt}</td>
-                  <td class="px-4 py-2 font-black text-slate-800 text-xs">${productDisplay}<br><span class="text-[9px] text-slate-400 font-bold italic">${tx.remarks || ''}</span></td>
-                  <td class="px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-widest">${staffDisplay}</td>
-                  <td class="px-4 py-2 text-center font-black">${tx.qty}</td>
-                  <td class="px-4 py-2 text-right font-black text-emerald-600">${amountDisplay}</td>
-              </tr>`;
-          }).join('');
-      }
+          if (pageData.length === 0) {
+              actBody.innerHTML = `<tr><td colspan="5" class="px-5 py-8 text-center text-slate-400 font-bold uppercase text-[10px] italic">No activity recorded.</td></tr>`;
+          } else {
+              actBody.innerHTML = pageData.map(tx => {
+                  const dt = new Date(tx.timestamp).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                  
+                  let amountDisplay = `₱${parseFloat(tx.val).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                  let productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">SALE</span>`;
+                  
+                  if (tx.displayType === 'B.O.') {
+                      amountDisplay = `<span class="text-orange-400 italic text-[10px]">Disposed</span>`;
+                      productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-2 py-0.5 rounded bg-orange-100 text-orange-700">B.O.</span>`;
+                  } else if (tx.displayType === 'TRANS-OUT') {
+                      amountDisplay = `<span class="text-purple-400 italic text-[10px]">To: ${tx.dest_store}</span>`;
+                      productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-2 py-0.5 rounded bg-purple-100 text-purple-700">SENT</span>`;
+                  } else if (tx.displayType === 'TRANS-IN') {
+                      amountDisplay = `<span class="text-emerald-400 italic text-[10px]">From: ${tx.store}</span>`;
+                      productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-2 py-0.5 rounded bg-emerald-100 text-emerald-700">RCVD</span>`;
+                  } else if (tx.displayType === 'INBOUND') {
+                      amountDisplay = `<span class="text-blue-400 italic text-[10px]">From: ${tx.dest_store}</span>`;
+                      productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-700">INBOUND</span>`;
+                  } else if (tx.displayType === 'MANUAL_RCV') {
+                      amountDisplay = `<span class="text-emerald-500 italic text-[10px]">Manual Entry</span>`;
+                      productDisplay = `${tx.sku} <span class="ml-2 text-[8px] font-black px-2 py-0.5 rounded bg-blue-100 text-blue-700">RCVD</span>`;
+                  }
+
+                  const staffDisplay = tx.staff ? tx.staff.toUpperCase() : '<span class="text-slate-300 italic">SYSTEM</span>';
+                  const remarksDisplay = tx.remarks ? `<br><span class="text-[9px] text-slate-400 font-bold italic">${tx.remarks}</span>` : '';
+
+                  return `
+                  <tr class="hover:bg-slate-50/80 transition-colors group">
+                      <td class="px-5 py-3.5 font-bold text-slate-500 text-xs">${dt}</td>
+                      <td class="px-5 py-3.5 font-black text-slate-800 text-xs">${productDisplay}${remarksDisplay}</td>
+                      <td class="px-5 py-3.5 text-xs font-bold text-slate-500 tracking-wider">${staffDisplay}</td>
+                      <td class="px-5 py-3.5 text-center font-black text-slate-800 text-xs">${tx.qty}</td>
+                      <td class="px-5 py-3.5 text-right font-black text-emerald-600 text-xs">${amountDisplay}</td>
+                  </tr>`;
+              }).join('');
+          }
+          
+          const infoEl = document.getElementById('outlet-activity-page-info');
+          if (infoEl) infoEl.innerText = `Showing Page ${window.OUTLET_ACTIVITY_PAGE} of ${totalPages} (Total: ${window.OUTLET_ACTIVITY_FILTERED.length})`;
+      };
+
+      window.changeOutletActivityPage = function(direction) {
+          window.OUTLET_ACTIVITY_PAGE += direction;
+          window.renderOutletActivityPage();
+      };
+
+      window.searchOutletActivity = function() {
+          const query = document.getElementById('outlet-activity-search').value.toLowerCase();
+          window.OUTLET_ACTIVITY_FILTERED = window.CURRENT_OUTLET_TRANSACTIONS.filter(tx => {
+              const searchStr = `${tx.sku} ${tx.staff || ''} ${tx.remarks || ''} ${tx.displayType}`.toLowerCase();
+              return searchStr.includes(query);
+          });
+          window.OUTLET_ACTIVITY_PAGE = 1;
+          window.renderOutletActivityPage();
+      };
+
+      // Call it initially
+      window.renderOutletActivityPage();
 
      // --- NEW: RENDER THE OUTLET CHARTS ---
       if(!window.OUTLET_CHARTS) window.OUTLET_CHARTS = {};
@@ -2979,6 +3197,41 @@ else if (tx.displayType === 'INBOUND') {
           }
       }
   };
+
+// --- NEW: RENDER HISTORICAL SALES LIST ---
+  window.renderHistoricalSalesList = function() {
+      const tbody = document.getElementById('admin-historical-list');
+      if(!tbody) return;
+
+      // Filter only the active Historical Injections
+      const historicalTx = window.GLOBAL_TRANSACTIONS.filter(tx => tx.record_type === 'HISTORICAL' && !tx.is_voided);
+
+      if (historicalTx.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-slate-400 font-bold uppercase text-[10px] italic">No historical records injected yet.</td></tr>`;
+          return;
+      }
+
+      // Sort by newest first
+      historicalTx.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      tbody.innerHTML = historicalTx.map(tx => {
+          const monthDisplay = tx.timestamp.substring(0, 7); // Extracts just YYYY-MM
+          return `
+          <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3 font-black text-slate-800">${monthDisplay}</td>
+              <td class="px-4 py-3 font-bold text-slate-500 uppercase text-[10px]">${tx.region}</td>
+              <td class="px-4 py-3 text-right font-black text-emerald-600">₱${parseFloat(tx.val).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+              <td class="px-4 py-3 text-center">
+                  <button type="button" onclick="window.promptDeleteTx('${tx.id}')" class="text-red-400 hover:text-red-600 bg-red-50 w-8 h-8 rounded-lg transition-colors shadow-sm" title="Delete Record">
+                      <i class="fa-solid fa-trash text-[10px]"></i>
+                  </button>
+              </td>
+          </tr>
+          `;
+      }).join('');
+  };
+
+
 // --- PERFORMANCE MATRIX ENGINE ---
   window.renderPerformanceMatrix = function() {
 
@@ -2993,13 +3246,22 @@ else if (tx.displayType === 'INBOUND') {
           return;
       }
 
-      // GRAB THE GLOBAL CALENDAR MONTH
+      // GRAB THE GLOBAL CALENDAR MONTH & MODE
       const monthVal = document.getElementById('global-month-filter').value;
+      const mode = document.getElementById('global-time-mode') ? document.getElementById('global-time-mode').value : 'MONTH';
+      
       let startDateStr = ""; let endDateStr = "";
       if(monthVal) {
-          const year = parseInt(monthVal.split('-')[0]); const month = parseInt(monthVal.split('-')[1]);
-          startDateStr = new Date(year, month - 1, 1).toLocaleDateString('en-CA');
-          endDateStr = new Date(year, month, 0).toLocaleDateString('en-CA');
+          const year = parseInt(monthVal.split('-')[0]); 
+          const month = parseInt(monthVal.split('-')[1]);
+          
+          if (mode === 'YTD') {
+              startDateStr = new Date(year, 0, 1).toLocaleDateString('en-CA');
+              endDateStr = new Date(year, month, 0).toLocaleDateString('en-CA');
+          } else {
+              startDateStr = new Date(year, month - 1, 1).toLocaleDateString('en-CA');
+              endDateStr = new Date(year, month, 0).toLocaleDateString('en-CA');
+          }
       }
 
       let regionData = {};
@@ -3034,9 +3296,20 @@ else if (tx.displayType === 'INBOUND') {
           const total = storeData[storeName];
           let storeQuota = 0;
           
-          // Fetch the store's quota for the currently viewed month
-          if (window.MASTER_DATA && window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[monthVal] && window.MASTER_DATA.quotas[monthVal][storeName]) {
-              storeQuota = parseFloat(window.MASTER_DATA.quotas[monthVal][storeName]) || 0;
+          // UPGRADED: Smart YTD Quota Fetching for Performance Matrix
+          if (window.MASTER_DATA && window.MASTER_DATA.quotas) {
+              if (mode === 'YTD' && monthVal) {
+                  const tgtYear = parseInt(monthVal.split('-')[0]);
+                  const tgtMonth = parseInt(monthVal.split('-')[1]);
+                  for (let m = 1; m <= tgtMonth; m++) {
+                      const mKey = `${tgtYear}-${String(m).padStart(2, '0')}`;
+                      if (window.MASTER_DATA.quotas[mKey] && window.MASTER_DATA.quotas[mKey][storeName]) {
+                          storeQuota += parseFloat(window.MASTER_DATA.quotas[mKey][storeName]) || 0;
+                      }
+                  }
+              } else if (window.MASTER_DATA.quotas[monthVal] && window.MASTER_DATA.quotas[monthVal][storeName]) {
+                  storeQuota = parseFloat(window.MASTER_DATA.quotas[monthVal][storeName]) || 0;
+              }
           }
           
           // 🚨 NEW: Fetch limits dynamically from the UI
@@ -3488,10 +3761,13 @@ window.renderAdminDirectories = function(data) {
           }).join('');
       }
 
-      if(outletsTbody && data.outlets) {
+     if(outletsTbody && data.outlets) {
           outletsTbody.innerHTML = Object.keys(data.outlets).map(outlet => {
               const o = data.outlets[outlet];
-              return `<tr class="hover:bg-slate-50"><td class="px-4 py-2 font-black text-slate-800 leading-tight">${outlet}</td><td class="px-4 py-2 font-bold text-slate-500 text-[10px] uppercase">${o.region}<br><span class="text-emerald-500">${o.type}</span></td><td class="px-4 py-2 text-center whitespace-nowrap"><button type="button" onclick="window.promptEditOutlet('${outlet}')" class="text-blue-400 hover:text-blue-600 mr-2"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="window.deleteAdminItem('outlet', '${outlet}')" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+              // 🚨 THE BUG FIX: This safely "escapes" the apostrophe so it doesn't break the button!
+              const safeOutlet = outlet.replace(/'/g, "\\'"); 
+              
+              return `<tr class="hover:bg-slate-50"><td class="px-4 py-2 font-black text-slate-800 leading-tight">${outlet}</td><td class="px-4 py-2 font-bold text-slate-500 text-[10px] uppercase">${o.region}<br><span class="text-emerald-500">${o.type}</span></td><td class="px-4 py-2 text-center whitespace-nowrap"><button type="button" onclick="window.promptEditOutlet('${safeOutlet}')" class="text-blue-400 hover:text-blue-600 mr-2"><i class="fa-solid fa-pen"></i></button><button type="button" onclick="window.deleteAdminItem('outlet', '${safeOutlet}')" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button></td></tr>`;
           }).join('');
       }
       
@@ -3677,17 +3953,21 @@ try {
       } catch(e) { window.showToast("Error updating user.", "error"); }
   };
 
-  // FULL EDIT OUTLET MODAL
+ // FULL EDIT OUTLET MODAL
   window.promptEditOutlet = function(outlet) {
       const o = window.MASTER_DATA.outlets[outlet];
       const regionOpts = window.MASTER_DATA.regions.map(r => `<option value="${r}" ${o.region===r?'selected':''}>${r}</option>`).join('');
       const typeOpts = window.MASTER_DATA.business_types.map(t => `<option value="${t}" ${o.type===t?'selected':''}>${t}</option>`).join('');
+      
+      // 🚨 THE BUG FIX: Safely escape the apostrophe for the Save button
+      const safeOutlet = outlet.replace(/'/g, "\\'");
+
       openModalHTML(`
           <div class="p-5 bg-emerald-600 text-white"><h3 class="font-black text-lg"><i class="fa-solid fa-store mr-2"></i>Edit Outlet: ${outlet}</h3></div>
           <div class="p-6 space-y-4">
               <div><label class="text-[10px] font-black text-slate-500 uppercase">Region</label><select id="modal-eo-region" class="form-input mt-1">${regionOpts}</select></div>
               <div><label class="text-[10px] font-black text-slate-500 uppercase">Business Type</label><select id="modal-eo-type" class="form-input mt-1">${typeOpts}</select></div>
-              <div class="flex gap-3 justify-end mt-4"><button onclick="closeModal()" class="px-5 py-2 font-bold text-slate-500">Cancel</button><button onclick="executeEditOutlet('${outlet}')" class="px-5 py-2 bg-emerald-600 text-white font-black rounded-lg">Save Outlet</button></div>
+              <div class="flex gap-3 justify-end mt-4"><button onclick="closeModal()" class="px-5 py-2 font-bold text-slate-500">Cancel</button><button onclick="executeEditOutlet('${safeOutlet}')" class="px-5 py-2 bg-emerald-600 text-white font-black rounded-lg">Save Outlet</button></div>
           </div>`);
   };
   window.executeEditOutlet = async function(outlet) {
