@@ -989,7 +989,7 @@
             
             <form onsubmit="injectHistoricalSales(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-rose-50/30 p-4 rounded-xl border border-rose-100/50">
                 <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Target Month</label><input type="month" id="hist-month" class="form-input bg-white cursor-pointer" required></div>
-                <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Region Hub</label><select id="hist-region" class="form-input bg-white" required><option value="Mega Manila">Mega Manila</option><option value="Visayas">Visayas</option><option value="DAVAO">DAVAO</option><option value="North Luzon">North Luzon</option></select></div>
+                <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Region Hub</label><select id="hist-region" class="form-input bg-white" required></select></div>
                 <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Gross Revenue (₱)</label><input type="number" id="hist-amount" step="0.01" class="form-input bg-white" placeholder="e.g. 1500000" required></div>
                 <div><button type="submit" class="w-full py-4 bg-rose-500 text-white font-black rounded-xl text-xs shadow-md hover:bg-rose-600 uppercase tracking-widest transition-transform active:scale-95">Inject Revenue</button></div>
             </form>
@@ -1023,7 +1023,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, setDoc, collection, addDoc, serverTimestamp, updateDoc, arrayUnion, arrayRemove, query, orderBy, limit, onSnapshot, deleteDoc, deleteField, where, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, getDocs, setDoc, collection, addDoc, serverTimestamp, updateDoc, arrayUnion, arrayRemove, query, orderBy, limit, onSnapshot, deleteDoc, deleteField, where, writeBatch, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
   
   // NEW: Import Official Firebase Auth
   import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -1130,6 +1130,10 @@ window.MASTER_DATA = data; // Save global reference for admin edits
                 
                 const userRegion = document.getElementById('new-user-region');
                 if(userRegion) userRegion.innerHTML = `<option value="ALL">ALL REGIONS (Global)</option>` + regionOptions;
+
+                // 🚨 NEW: Injects all dynamic regions into the Historical Sales form
+                const histRegion = document.getElementById('hist-region');
+                if(histRegion) histRegion.innerHTML = regionOptions;
                 
                 // Secure the Master Ledger dropdown as well!
                 const masterRegionFilter = document.getElementById('master-filter-region');
@@ -1604,56 +1608,87 @@ window.addOutlet = async function(e) {
   // --- REAL-TIME LEDGER & SEARCH ENGINE ---
   window.GLOBAL_TRANSACTIONS = []; 
 
-  window.setupLedgerListener = function() {
+window.setupLedgerListener = async function() {
       const ledgerRef = collection(db, "transaction_ledger");
-      // REMOVED limit(1000) so April/May Beginning Inventory calculates perfectly.
-      // Keeping "desc" so the newest records stay at the top of the audit ledger.
-      const q = query(ledgerRef, orderBy("timestamp", "desc")); 
+      const currentYear = new Date().getFullYear();
+      const startOfYear = `${currentYear}-01-01T00:00:00`;
 
-      onSnapshot(q, { includeMetadataChanges: true }, (snapshot) => {
-         // ENTERPRISE FIX: Strictly monitor server-side reads to protect Spark Plan
+      // 🚨 PART 1: THE MATH ENGINE (Heavy Lifting, Heavily Cached)
+      // We use getDocs to load the year's data safely from your browser's IndexedDB cache.
+      const mathQuery = query(ledgerRef, where("timestamp", ">=", startOfYear));
+      const mathSnapshot = await getDocs(mathQuery);
+
+      window.GLOBAL_TRANSACTIONS = [];
+      let initialSales = 0; let initialUnits = 0;
+
+      mathSnapshot.forEach((doc) => {
+          const tx = doc.data(); tx.id = doc.id; tx.record_type = tx.record_type || 'SALE';
+          window.GLOBAL_TRANSACTIONS.push(tx);
+          if(tx.record_type === 'SALE' && !tx.is_voided) {
+              initialSales += parseFloat(tx.val) || 0;
+              initialUnits += parseFloat(tx.qty) || 0;
+          }
+      });
+
+      // Run initial dashboard math
+      const dashSales = document.querySelector('#dash .grid > div:nth-child(1) h3');
+      const dashUnits = document.querySelector('#dash .grid > div:nth-child(2) h3');
+      if(dashSales) dashSales.innerText = '₱' + initialSales.toLocaleString(undefined, {minimumFractionDigits: 2});
+      if(dashUnits) dashUnits.innerText = initialUnits.toLocaleString();
+
+      if(window.renderPerformanceMatrix) window.renderPerformanceMatrix();
+      if(window.renderRegionalDrilldown && document.getElementById('drilldown-region-select').value !== "") window.renderRegionalDrilldown();
+      if(window.renderMasterInventory) window.renderMasterInventory();
+      if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
+      if(window.searchMasterLedger) window.searchMasterLedger();
+      if(window.renderHistoricalSalesList) window.renderHistoricalSalesList();
+      window.renderMiniLedger();
+
+      // 🚨 PART 2: THE LIVE ACTIVITY FEED (Strictly Limited to 50 reads)
+      // This stays connected to Firebase to instantly catch new sales
+      const liveQuery = query(ledgerRef, orderBy("timestamp", "desc"), limit(50));
+
+      onSnapshot(liveQuery, { includeMetadataChanges: true }, (snapshot) => {
           if (!snapshot.metadata.fromCache) {
-              // Only count documents that actually triggered a read from the Google servers
               const serverReads = snapshot.docChanges().filter(change => !change.doc.metadata.fromCache).length;
-              window.trackFirebaseRead(serverReads === 0 ? 1 : serverReads); 
+              window.trackFirebaseRead(serverReads === 0 ? 1 : serverReads);
           }
 
-          window.GLOBAL_TRANSACTIONS = [];
-          let totalSales = 0;
-          let totalUnits = 0;
+          let requiresMathUpdate = false;
 
-          snapshot.forEach((doc) => {
-              const tx = doc.data();
-              tx.id = doc.id; 
-              tx.record_type = tx.record_type || 'SALE'; // Fallback for old records
-              window.GLOBAL_TRANSACTIONS.push(tx);
-              
-              if(tx.record_type === 'SALE') {
-                  totalSales += parseFloat(tx.val) || 0;
-                  totalUnits += parseFloat(tx.qty) || 0;
+          // Sync the latest 50 into our Master Array if they are brand new or edited
+          snapshot.docChanges().forEach((change) => {
+              const tx = change.doc.data(); tx.id = change.doc.id; tx.record_type = tx.record_type || 'SALE';
+
+              if (change.type === "added") {
+                  const existsIndex = window.GLOBAL_TRANSACTIONS.findIndex(t => t.id === tx.id);
+                  if (existsIndex === -1) {
+                      window.GLOBAL_TRANSACTIONS.push(tx);
+                      requiresMathUpdate = true;
+                  }
+              } else if (change.type === "modified") {
+                  const existsIndex = window.GLOBAL_TRANSACTIONS.findIndex(t => t.id === tx.id);
+                  if (existsIndex !== -1) {
+                      window.GLOBAL_TRANSACTIONS[existsIndex] = tx;
+                      requiresMathUpdate = true;
+                  }
               }
           });
-          
-          // SMART FIX: Check if the Encoder is currently active on the POS Tab
-          const isEncoding = document.getElementById('manual-sales').classList.contains('active');
 
-          if (isEncoding) {
-              // ENCODER MODE: Freeze the heavy charts! Only update the mini ledger so they see their own entry.
-              renderMiniLedger();
-          } else {
-              // NORMAL MODE: Update everything live
-              const dashSales = document.querySelector('#dash .grid > div:nth-child(1) h3');
-              const dashUnits = document.querySelector('#dash .grid > div:nth-child(2) h3');
-              if(dashSales) dashSales.innerText = '₱' + totalSales.toLocaleString(undefined, {minimumFractionDigits: 2});
-              if(dashUnits) dashUnits.innerText = totalUnits.toLocaleString();
+          if (requiresMathUpdate) {
+              // Sort array to keep newest at top
+              window.GLOBAL_TRANSACTIONS.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
-              renderMiniLedger();
-              if(window.searchMasterLedger) window.searchMasterLedger();
-              if(window.renderPerformanceMatrix) window.renderPerformanceMatrix();
-              if(window.renderRegionalDrilldown && document.getElementById('drilldown-region-select').value !== "") window.renderRegionalDrilldown();
-              if(window.renderMasterInventory) window.renderMasterInventory(); 
-              if(window.renderExecutiveDashboard) window.renderExecutiveDashboard(); 
-              if(window.renderHistoricalSalesList) window.renderHistoricalSalesList(); // 🚨 NEW: Auto-updates the historical list! 
+              const isEncoding = document.getElementById('manual-sales').classList.contains('active');
+              window.renderMiniLedger(); // Always update live feed
+
+              if (!isEncoding) {
+                  // Only update heavy dashboards if they aren't actively encoding
+                  if(window.renderPerformanceMatrix) window.renderPerformanceMatrix();
+                  if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
+                  if(window.renderMasterInventory) window.renderMasterInventory();
+                  if(window.searchMasterLedger) window.searchMasterLedger();
+              }
           }
       });
   };
@@ -1969,20 +2004,44 @@ window.syncGlobalMonth = async function() {
               const globalPct = Math.min((totalRev / globalTarget) * 100, 100).toFixed(1);
               const globalColor = globalPct >= 100 ? 'bg-emerald-500' : 'bg-blue-600';
               
-              const sortedRegions = Object.keys(currentMonthQuotas)
-                  .filter(r => r !== 'GLOBAL' && window.MASTER_DATA.regions && window.MASTER_DATA.regions.includes(r))
-                  .sort((a,b) => {
-                      const quotaA = parseFloat(currentMonthQuotas[a]) || 1;
-                      const quotaB = parseFloat(currentMonthQuotas[b]) || 1;
-                      const pctA = (regionRev[a] || 0) / quotaA;
-                      const pctB = (regionRev[b] || 0) / quotaB;
-                      return pctB - pctA; 
-                  });
+              // 🚨 UPGRADED FIX: Strictly show REGIONS ONLY (ignore individual stores) IF they have Sales or a Quota.
+              let activeRegions = new Set();
+              
+              // Helper to check if a name is actually a registered Region Hub
+              const isRegisteredRegion = (name) => {
+                  return window.MASTER_DATA && window.MASTER_DATA.regions && window.MASTER_DATA.regions.includes(name);
+              };
+
+              // 1. Add items that generated actual sales (Regions and injected areas like E-Commerce)
+              Object.keys(regionRev).forEach(r => {
+                  if (regionRev[r] > 0) activeRegions.add(r);
+              });
+              
+              // 2. Add ONLY registered Regional Hubs that have an active target quota
+              Object.keys(currentMonthQuotas).forEach(r => {
+                  if (r !== 'GLOBAL' && isRegisteredRegion(r) && parseFloat(currentMonthQuotas[r]) > 0) {
+                      activeRegions.add(r);
+                  }
+              });
+              
+              const sortedRegions = Array.from(activeRegions).sort((a,b) => {
+                  const salesA = regionRev[a] || 0;
+                  const salesB = regionRev[b] || 0;
+                  return salesB - salesA; // Rank by Highest Gross Sales
+              });
               
               regionTargetsHTML = sortedRegions.map((reg, index) => {
-                  const regQuota = parseFloat(currentMonthQuotas[reg]);
+                  const regQuota = parseFloat(currentMonthQuotas[reg]) || 0;
                   const rSales = regionRev[reg] || 0;
-                  const rPct = Math.min((rSales / regQuota) * 100, 100).toFixed(1);
+                  
+                  // Safe math to prevent errors if a quota hasn't been set yet
+                  let rPct = 0;
+                  if (regQuota > 0) {
+                      rPct = Math.min((rSales / regQuota) * 100, 100).toFixed(1);
+                  } else if (rSales > 0) {
+                      rPct = 100.0; 
+                  }
+
                   const variance = rSales - regQuota;
                   const varColor = variance >= 0 ? 'text-emerald-500' : 'text-red-500';
                   const barCol = rPct >= 100 ? 'bg-emerald-400' : 'bg-slate-300';
@@ -1991,7 +2050,7 @@ window.syncGlobalMonth = async function() {
                   return `
                   <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
                       <td class="px-4 py-3 font-black text-slate-700 text-xs flex items-center">${rankIcon} ${reg}</td>
-                      <td class="px-4 py-3 text-right font-bold text-slate-500 text-xs">₱${regQuota.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
+                      <td class="px-4 py-3 text-right font-bold text-slate-500 text-xs">${regQuota > 0 ? '₱' + regQuota.toLocaleString(undefined, {minimumFractionDigits:2}) : '<span class="text-[9px] text-slate-300 italic">No Target</span>'}</td>
                       <td class="px-4 py-3 text-right font-black text-slate-800 text-xs">₱${rSales.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
                       <td class="px-4 py-3 text-right font-bold ${varColor} text-xs">₱${variance.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
                       <td class="px-4 py-3 align-middle w-32">
@@ -3532,17 +3591,11 @@ function applyRoleRestrictions() {
           regSelect.disabled = false;
           window.showTab('dash', document.getElementById('nav-dash'));
       }
-     // 4. REGIONAL SUPERVISOR / MANAGER CHECK
+    // 4. REGIONAL SUPERVISOR / MANAGER CHECK
       else if (role === "Regional Supervisor" || role === "Regional Manager") {
-          document.getElementById('nav-dash').style.display = 'none';
-          document.getElementById('nav-rank').style.display = 'none';
-          document.getElementById('nav-inv').style.display = 'none';
-          document.getElementById('nav-master').style.display = 'none';
-          document.getElementById('nav-head-intel').style.display = 'none';
-          document.getElementById('nav-head-ops').style.display = 'none';
-          
-          // Secure dropdown populating is now handled instantly inside loadMasterSettings!
-          window.showTab('regions', document.getElementById('nav-regions'));
+          // 🚨 UPGRADED: Granted full visibility to intelligence and ledger tabs!
+          // System Config (Admin) remains locked out by default.
+          window.showTab('dash', document.getElementById('nav-dash'));
       }
       // 5. GLOBAL ACCESS ROLES
       else {
