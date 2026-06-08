@@ -2622,7 +2622,24 @@ let regionSales = 0;
       `;
       
       const monthVal = document.getElementById('global-month-filter').value;
-      const regionQuota = (window.MASTER_DATA && window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[monthVal] && window.MASTER_DATA.quotas[monthVal][selectedRegion]) ? parseFloat(window.MASTER_DATA.quotas[monthVal][selectedRegion]) : 0;
+      const mode = document.getElementById('global-time-mode') ? document.getElementById('global-time-mode').value : 'MONTH';
+
+      // 🚨 FIX: Smart YTD Quota summation for Regional Hubs
+      let regionQuota = 0;
+      if (window.MASTER_DATA && window.MASTER_DATA.quotas) {
+          if (mode === 'YTD' && monthVal) {
+              const tgtYear = parseInt(monthVal.split('-')[0]);
+              const tgtMonth = parseInt(monthVal.split('-')[1]);
+              for (let m = 1; m <= tgtMonth; m++) {
+                  const mKey = `${tgtYear}-${String(m).padStart(2, '0')}`;
+                  if (window.MASTER_DATA.quotas[mKey] && window.MASTER_DATA.quotas[mKey][selectedRegion]) {
+                      regionQuota += parseFloat(window.MASTER_DATA.quotas[mKey][selectedRegion]) || 0;
+                  }
+              }
+          } else if (window.MASTER_DATA.quotas[monthVal] && window.MASTER_DATA.quotas[monthVal][selectedRegion]) {
+              regionQuota = parseFloat(window.MASTER_DATA.quotas[monthVal][selectedRegion]) || 0;
+          }
+      }
       
       if (regionQuota > 0) {
           const targetYear = parseInt(monthVal.split('-')[0]); 
@@ -2634,7 +2651,7 @@ let regionSales = 0;
           let remainingDays = 0;
           if (isCurrentMonth) {
               remainingDays = endOfMonth.getDate() - today.getDate();
-              if (remainingDays < 1) remainingDays = 1; 
+              if (remainingDays < 0) remainingDays = 0; 
           } else if (today < endOfMonth) {
               remainingDays = endOfMonth.getDate(); 
           }
@@ -2644,9 +2661,17 @@ let regionSales = 0;
           const remainingSales = Math.max(0, regionQuota - regionSales);
           const dailyRequired = remainingDays > 0 ? remainingSales / remainingDays : 0;
           
-          // --- AI FORECAST MATH ---
-          const daysPassed = isCurrentMonth ? Math.max(1, today.getDate()) : endOfMonth.getDate();
-          const projectedTotal = (regionSales / Math.max(1, daysPassed)) * endOfMonth.getDate();
+          // --- AI FORECAST MATH (YTD SAFE) ---
+          const startDObj = new Date(document.getElementById('dash-start-date').value);
+          const endDObj = new Date(document.getElementById('dash-end-date').value);
+          const totalPeriodDays = Math.ceil(Math.abs(endDObj - startDObj) / (1000 * 60 * 60 * 24)) + 1;
+
+          let daysPassed = totalPeriodDays;
+          if (isCurrentMonth) {
+              daysPassed = Math.ceil(Math.abs(today - startDObj) / (1000 * 60 * 60 * 24)) + 1;
+          }
+
+          const projectedTotal = (regionSales / Math.max(1, daysPassed)) * totalPeriodDays;
           const projectedVariance = projectedTotal - regionQuota;
           const trajColor = projectedVariance >= 0 ? 'text-emerald-600' : 'text-orange-600';
           const trajBg = projectedVariance >= 0 ? 'bg-emerald-50/80 border-emerald-200' : 'bg-orange-50/80 border-orange-200';
@@ -2803,12 +2828,18 @@ window.viewOutletDashboard = function(storeName, storeTypeOrRegion) {
           document.getElementById('dash-outlet-type').innerText = storeTypeOrRegion;
       }
       
-      // 🚨 FIX: Stop hijacking the dates! Read from the Global Month Filter instead.
+      // 🚨 UPGRADED FIX: Fully respect YTD mode when setting dashboard dates!
       const globalMonthVal = document.getElementById('global-month-filter').value;
+      const mode = document.getElementById('global-time-mode') ? document.getElementById('global-time-mode').value : 'MONTH';
+
       if (globalMonthVal) {
           const year = parseInt(globalMonthVal.split('-')[0]);
           const month = parseInt(globalMonthVal.split('-')[1]);
-          document.getElementById('dash-start-date').value = new Date(year, month - 1, 1).toLocaleDateString('en-CA');
+          if (mode === 'YTD') {
+              document.getElementById('dash-start-date').value = new Date(year, 0, 1).toLocaleDateString('en-CA');
+          } else {
+              document.getElementById('dash-start-date').value = new Date(year, month - 1, 1).toLocaleDateString('en-CA');
+          }
           document.getElementById('dash-end-date').value = new Date(year, month, 0).toLocaleDateString('en-CA');
       } else {
           // Fallback only if no month is selected
@@ -2964,7 +2995,23 @@ window.GLOBAL_TRANSACTIONS.forEach(tx => {
       }
 
       const monthVal = document.getElementById('global-month-filter').value;
-      const outletQuota = (window.MASTER_DATA && window.MASTER_DATA.quotas && window.MASTER_DATA.quotas[monthVal] && window.MASTER_DATA.quotas[monthVal][storeName]) ? parseFloat(window.MASTER_DATA.quotas[monthVal][storeName]) : 0;
+      const mode = document.getElementById('global-time-mode') ? document.getElementById('global-time-mode').value : 'MONTH';
+      
+      let outletQuota = 0;
+      if (window.MASTER_DATA && window.MASTER_DATA.quotas) {
+          if (mode === 'YTD' && monthVal) {
+              const tgtYear = parseInt(monthVal.split('-')[0]);
+              const tgtMonth = parseInt(monthVal.split('-')[1]);
+              for (let m = 1; m <= tgtMonth; m++) {
+                  const mKey = `${tgtYear}-${String(m).padStart(2, '0')}`;
+                  if (window.MASTER_DATA.quotas[mKey] && window.MASTER_DATA.quotas[mKey][storeName]) {
+                      outletQuota += parseFloat(window.MASTER_DATA.quotas[mKey][storeName]) || 0;
+                  }
+              }
+          } else if (window.MASTER_DATA.quotas[monthVal] && window.MASTER_DATA.quotas[monthVal][storeName]) {
+              outletQuota = parseFloat(window.MASTER_DATA.quotas[monthVal][storeName]) || 0;
+          }
+      }
 
       if (!isGodView && outletQuota > 0) {
           const targetYear = parseInt(monthVal.split('-')[0]); 
@@ -2973,18 +3020,22 @@ window.GLOBAL_TRANSACTIONS.forEach(tx => {
           const isCurrentMonth = (today.getFullYear() === targetYear && today.getMonth() + 1 === targetMonth);
           const endOfMonth = new Date(targetYear, targetMonth, 0);
 
+          // 🚨 UPGRADED FIX: Unified Calendar Math to perfectly match the Regional Tracker
+          let totalPeriodDays = diffDays;
+          let remainingDays = 0;
           let daysPassed = 0;
-          let totalPeriodDays = diffDays; 
 
-          if (today >= start && today <= end) {
-              daysPassed = Math.ceil(Math.abs(today - start) / (1000 * 60 * 60 * 24)) + 1;
-          } else if (today > end) {
+          if (isCurrentMonth) {
+              remainingDays = endOfMonth.getDate() - today.getDate();
+              daysPassed = today.getDate();
+          } else if (today > endOfMonth) {
+              remainingDays = 0;
               daysPassed = totalPeriodDays;
           } else {
-              daysPassed = 1; 
+              remainingDays = totalPeriodDays;
+              daysPassed = 1;
           }
-
-          let remainingDays = totalPeriodDays - daysPassed;
+          
           if (remainingDays < 0) remainingDays = 0;
 
           const pctAchieved = Math.min((periodTotalSales / outletQuota) * 100, 100).toFixed(1);
