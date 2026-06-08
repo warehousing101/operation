@@ -1909,6 +1909,7 @@ window.syncGlobalMonth = async function() {
           });
           
           window.GLOBAL_TRANSACTIONS.forEach(tx => {
+              if (tx.is_voided) return; // 🚨 THE FIX: Completely ignore deleted/voided ghost records!
               if(!globalInv[tx.sku]) return;
 
               const txDate = tx.timestamp.substring(0, 10);
