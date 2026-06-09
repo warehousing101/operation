@@ -1050,12 +1050,18 @@
                 </div>
             </div>
             
-            <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Quantity to Convert</label>
-                <input type="number" id="migrate-qty" class="w-full border-2 border-slate-200 p-3 rounded-lg focus:border-purple-500 focus:ring-0 text-lg font-bold" placeholder="e.g., 294" min="1">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Quantity</label>
+                    <input type="number" id="migrate-qty" class="w-full border-2 border-slate-200 p-3 rounded-lg focus:border-purple-500 focus:ring-0 text-lg font-bold" placeholder="e.g., 294" min="1">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Date (Optional)</label>
+                    <input type="datetime-local" id="migrate-date" class="w-full border-2 border-slate-200 p-3 rounded-lg focus:border-purple-500 focus:ring-0 text-xs font-bold">
+                </div>
             </div>
             
-            <button onclick="window.executeSkuMigration()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-lg shadow-lg mt-2 transition uppercase tracking-wider text-sm">
+            <button onclick="window.executeSkuMigration()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-lg shadow-lg mt-3 transition uppercase tracking-wider text-sm">
                 Execute Conversion Now
             </button>
         </div>
@@ -1727,12 +1733,14 @@ window.setupLedgerListener = async function() {
               const isEncoding = document.getElementById('manual-sales').classList.contains('active');
               window.renderMiniLedger(); // Always update live feed
 
-              if (!isEncoding) {
+             if (!isEncoding) {
                   // Only update heavy dashboards if they aren't actively encoding
                   if(window.renderPerformanceMatrix) window.renderPerformanceMatrix();
                   if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
                   if(window.renderMasterInventory) window.renderMasterInventory();
                   if(window.searchMasterLedger) window.searchMasterLedger();
+                  if(window.renderRegionalDrilldown) window.renderRegionalDrilldown(); // 🚨 FIX: Auto-update Regions
+                  if(window.CURRENT_OUTLET && window.CURRENT_OUTLET.name) window.refreshOutletDashboard(); // 🚨 FIX: Auto-update specific outlet views
               }
           }
       });
@@ -1795,6 +1803,7 @@ window.syncGlobalMonth = async function() {
       if(window.renderRegionalDrilldown) window.renderRegionalDrilldown(); 
       if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
       if(window.renderMasterInventory) window.renderMasterInventory(); 
+      if(window.renderPerformanceMatrix) window.renderPerformanceMatrix(); // 🚨 FIX: Now Territory Rankings will instantly refresh!
   };
   // NEW SPECIFIC DATE ANALYZER
 // NEW SPECIFIC DATE ANALYZER (UPGRADED & WIRED TO DASHBOARD)
@@ -2299,7 +2308,7 @@ let invData = {};
                   if (isValidSource) {
                       if(rType === 'SALE') invData[tx.sku].sold += qty;
                       else if(rType === 'BO') invData[tx.sku].bo += qty;
-                      else if(rType === 'BUNDLE_OUT') invData[tx.sku].bundleOut += qty; // BUG FIXED: Raw Materials Deducted
+                      else if(rType === 'BUNDLE_OUT') invData[tx.sku].bundleOut += qty; 
                       else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN' || rType === 'SKU_MIGRATION') invData[tx.sku].in += qty;
                   }
               }
@@ -2307,8 +2316,9 @@ let invData = {};
               if (isValidSource) {
                   if(rType === 'SALE') invData[tx.sku].sold += qty;
                   else if(rType === 'BO') invData[tx.sku].bo += qty;
-                  else if(rType === 'BUNDLE_OUT') invData[tx.sku].bundleOut += qty; // BUG FIXED
-                  else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN') invData[tx.sku].in += qty;
+                  else if(rType === 'BUNDLE_OUT') invData[tx.sku].bundleOut += qty; 
+                  // 🚨 FIX 5 APPLIED HERE: Added SKU_MIGRATION to the All-Time View
+                  else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN' || rType === 'SKU_MIGRATION') invData[tx.sku].in += qty;
               }
           }
       });
@@ -3208,7 +3218,7 @@ window.GLOBAL_TRANSACTIONS.forEach(tx => {
           <tr class="hover:bg-slate-50 transition-colors">
               <td class="px-4 py-2 font-black text-slate-800 w-1/3 leading-tight">${sku}<br><span class="font-bold text-[9px] text-slate-400">${s.name}</span></td>
               <td class="px-3 py-2 text-center border-l border-slate-100 font-black text-slate-500">${s.begInv}</td>
-              <td class="px-3 py-2 text-center border-l border-slate-100 font-bold text-emerald-500">${s.in > 0 ? s.in : '<span class="text-[9px] text-slate-300 italic">Pending...</span>'}</td>
+              <td class="px-3 py-2 text-center border-l border-slate-100 font-bold text-emerald-500">${s.in !== 0 ? s.in : '<span class="text-[9px] text-slate-300 italic">Pending...</span>'}</td>
               <td class="px-3 py-2 text-center border-l border-slate-100 font-black text-blue-600">${s.sold}</td>
               <td class="px-3 py-2 text-center border-l border-slate-100 font-bold text-orange-500">${s.bo}</td>
               <td class="px-3 py-2 text-center border-l border-slate-100 font-bold text-purple-500">${s.transferOut}</td>
@@ -4332,6 +4342,7 @@ window.executeSkuMigration = function() {
     const oldSkuName = document.getElementById('migrate-old-sku').value.trim();
     const newSkuName = document.getElementById('migrate-new-sku').value.trim();
     const convertQty = parseInt(document.getElementById('migrate-qty').value);
+    const customDate = document.getElementById('migrate-date').value; // 🚨 GRAB THE NEW DATE
 
     if (!outletName || !oldSkuName || !newSkuName || isNaN(convertQty) || convertQty <= 0) {
         if(window.showToast) window.showToast("Missing info or invalid quantity. Cannot convert.", "error");
@@ -4342,14 +4353,16 @@ window.executeSkuMigration = function() {
         return;
     }
 
-    window.runAutomaticSkuConverter(outletName, oldSkuName, newSkuName, convertQty);
+    window.runAutomaticSkuConverter(outletName, oldSkuName, newSkuName, convertQty, customDate);
 };
 
-window.runAutomaticSkuConverter = async function(outletName, oldSkuName, newSkuName, convertQty) {
+window.runAutomaticSkuConverter = async function(outletName, oldSkuName, newSkuName, convertQty, customDate) {
     try {
-        const batch = window.writeBatch(window.db); // Uses your existing batch logic
-        const timestamp = window.getExactDatetimeLocal(); // Matches your exact timezone function
+        const batch = window.writeBatch(window.db); 
+        // 🚨 FIX: Use the custom date if provided, otherwise use current time
+        const timestamp = customDate ? customDate : window.getExactDatetimeLocal(); 
         const currentUser = (window.CURRENT_USER && window.CURRENT_USER.name) ? window.CURRENT_USER.name : "System Admin";
+        const trailMsg = `[MIGRATION by ${currentUser}]`; // 🚨 FIX: Proper Audit Trail
         
         // Grab region automatically from your OUTLET_DATA memory
         const region = (window.OUTLET_DATA && window.OUTLET_DATA[outletName]) ? window.OUTLET_DATA[outletName].region : "UNKNOWN";
@@ -4358,7 +4371,7 @@ window.runAutomaticSkuConverter = async function(outletName, oldSkuName, newSkuN
         const deductRef = window.doc(window.collection(window.db, "transaction_ledger"));
         batch.set(deductRef, {
             timestamp: timestamp, region: region, type: "OUTLET", store: outletName,
-            sku: oldSkuName, qty: -Math.abs(convertQty), val: 0, remarks: `[AUTO-CONVERT] Migrated ${convertQty} units to ${newSkuName}`, 
+            sku: oldSkuName, qty: -Math.abs(convertQty), val: 0, remarks: `${trailMsg} Migrated ${convertQty} units to ${newSkuName}`,
             audit: "MIGRATION", record_type: "SKU_MIGRATION", dest_store: "", staff: currentUser, 
             system_logged_at: window.serverTimestamp() 
         });
@@ -4367,7 +4380,7 @@ window.runAutomaticSkuConverter = async function(outletName, oldSkuName, newSkuN
         const addRef = window.doc(window.collection(window.db, "transaction_ledger"));
         batch.set(addRef, {
             timestamp: timestamp, region: region, type: "OUTLET", store: outletName,
-            sku: newSkuName, qty: Math.abs(convertQty), val: 0, remarks: `[AUTO-CONVERT] Received ${convertQty} units from ${oldSkuName}`, 
+            sku: newSkuName, qty: Math.abs(convertQty), val: 0, remarks: `${trailMsg} Received ${convertQty} units from ${oldSkuName}`,
             audit: "MIGRATION", record_type: "SKU_MIGRATION", dest_store: "", staff: currentUser, 
             system_logged_at: window.serverTimestamp() 
         });
@@ -4388,6 +4401,10 @@ window.runAutomaticSkuConverter = async function(outletName, oldSkuName, newSkuN
         document.getElementById('migrate-new-sku').value = '';
         document.getElementById('migrate-qty').value = '';
         document.getElementById('sku-migration-modal').classList.add('hidden');
+        
+        // 🚨 INSTANT SYNC COMMANDS: Force UI to update immediately without F5!
+        if(window.renderMasterInventory) window.renderMasterInventory();
+        if(window.CURRENT_OUTLET && window.CURRENT_OUTLET.name) window.refreshOutletDashboard();
         
     } catch (error) {
         console.error("Migration Error:", error);
