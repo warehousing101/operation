@@ -713,6 +713,7 @@
                                     <th class="px-6 py-4 text-center text-blue-500">Sold</th>
                                     <th class="px-6 py-4 text-center text-orange-500">B.O. (Disp)</th>
                                     <th class="px-6 py-4 text-center text-slate-800">Net Physical Stock</th>
+                                    <th class="px-6 py-4 text-center text-indigo-500" title="Days of Cover">Forecast</th>
                                     <th class="px-6 py-4 text-right">Total Asset Value</th>
                                 </tr>
                             </thead>
@@ -1138,14 +1139,16 @@
   };
 
   // --- READ ENGINE (Loads your settings) ---
-  window.loadMasterSettings = async function() {
+  window.loadMasterSettings = function() {
     try {
         const docRef = doc(db, "system_settings", "master");
-        const docSnap = await getDoc(docRef);
-window.trackFirebaseRead(1); // Track the settings document read
-
-        if (docSnap.exists()) {
-            const data = docSnap.data();
+        
+        // 🚨 FIX 1: Real-time listener for Settings! No more F5 for new SKUs or Quotas!
+        onSnapshot(docRef, { includeMetadataChanges: true }, (docSnap) => {
+            if (!docSnap.metadata.fromCache) window.trackFirebaseRead(1); 
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
 window.MASTER_DATA = data; // Save global reference for admin edits
             
            
@@ -1245,6 +1248,7 @@ if (window.renderAdminDirectories) window.renderAdminDirectories(data);
             if(window.renderMasterInventory) window.renderMasterInventory(); 
             if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
         }
+      }); // <-- Closes the onSnapshot listener securely
     } catch (error) { console.error("Error fetching database:", error); }
   }
 
@@ -2323,6 +2327,18 @@ let invData = {};
           }
       });
 
+      // 🚨 FIX: Calculate exactly how many days are in the selected period for accurate math
+      let diffDays = 1;
+      if (timeFilter === 'MONTH' && startStr && endStr) {
+          const s = new Date(startStr); const e = new Date(endStr);
+          diffDays = Math.ceil(Math.abs(e - s) / (1000 * 60 * 60 * 24)) + 1;
+      } else {
+          // If All-Time (YTD) is selected, calculate from Jan 1st to Today
+          const today = new Date();
+          const startOfYear = new Date(today.getFullYear(), 0, 1);
+          diffDays = Math.ceil(Math.abs(today - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+      }
+
       let html = '';
       Object.keys(invData).sort().forEach(sku => {
           const item = invData[sku];
@@ -2334,6 +2350,20 @@ let invData = {};
           const assetVal = endInv > 0 ? endInv * item.price : 0;
           const eiColor = endInv < 0 ? 'text-red-500' : 'text-slate-800';
 
+          // 🚨 FIX: Generate the Global Forecast Badge
+          let avgDailySales = item.sold / diffDays;
+          let docText = '<span class="text-slate-300 italic text-[9px] font-bold">No Data</span>';
+          
+          if (item.sold > 0) {
+              let doc = endInv / avgDailySales;
+              if (endInv <= 0) docText = `<span class="px-2 py-1 bg-red-100 text-red-700 rounded-md text-[9px] font-black uppercase border border-red-200 shadow-sm">Out of Stock</span>`;
+              else if (doc < 7) docText = `<span class="px-2 py-1 bg-red-50 text-red-600 rounded-md text-[9px] font-black uppercase border border-red-200 shadow-sm animate-pulse">${doc.toFixed(0)} Days Left</span>`;
+              else if (doc < 14) docText = `<span class="px-2 py-1 bg-amber-50 text-amber-600 rounded-md text-[9px] font-black uppercase border border-amber-200 shadow-sm">${doc.toFixed(0)} Days Left</span>`;
+              else docText = `<span class="px-2 py-1 bg-emerald-50 text-emerald-600 rounded-md text-[9px] font-black uppercase border border-emerald-200 shadow-sm">${doc.toFixed(0)} Days Safe</span>`;
+          } else if (endInv > 0) {
+              docText = `<span class="px-2 py-1 bg-slate-100 text-slate-500 rounded-md text-[9px] font-black uppercase border border-slate-200 shadow-sm">Overstocked</span>`;
+          }
+
           html += `
           <tr class="hover:bg-slate-50 transition-colors">
               <td class="px-6 py-4 font-black text-slate-800 leading-tight">${sku}<br><span class="font-bold text-[9px] text-slate-400 uppercase tracking-widest">${item.name}</span></td>
@@ -2343,6 +2373,7 @@ let invData = {};
               <td class="px-6 py-4 text-center font-black text-blue-500">${item.sold}</td>
               <td class="px-6 py-4 text-center font-black text-orange-500">${item.bo}</td>
               <td class="px-6 py-4 text-center font-black ${eiColor} text-lg bg-slate-50">${endInv}</td>
+              <td class="px-6 py-4 text-center">${docText}</td>
               <td class="px-6 py-4 text-right font-black text-emerald-700">₱${assetVal.toLocaleString(undefined, {minimumFractionDigits:2})}</td>
           </tr>`;
       });
@@ -4244,6 +4275,16 @@ window.executeDeleteTx = async function(id) {
 
         await batch.commit();
 
+        // 🚨 FIX 4: Instantly strike-through deleted records without refreshing
+        const txIndex = window.GLOBAL_TRANSACTIONS.findIndex(t => t.id === id);
+        if (txIndex !== -1) {
+            window.GLOBAL_TRANSACTIONS[txIndex].is_voided = true;
+            window.GLOBAL_TRANSACTIONS[txIndex].audit = "VOIDED";
+        }
+        if(window.searchMasterLedger) window.searchMasterLedger();
+        if(window.renderMasterInventory) window.renderMasterInventory();
+        if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
+
         window.showToast(`Record VOIDED. History kept. Auth: ${approver}`, "success"); 
         closeModal(); 
     } 
@@ -4392,6 +4433,15 @@ window.runAutomaticSkuConverter = async function(outletName, oldSkuName, newSkuN
 
         // Send to Firebase
         await batch.commit();
+
+        // 🚨 FIX 3: Manually inject backdated records into memory so they appear instantly!
+        window.GLOBAL_TRANSACTIONS.push({
+            id: deductRef.id, timestamp: timestamp, region: region, type: "OUTLET", store: outletName, sku: oldSkuName, qty: -Math.abs(convertQty), val: 0, remarks: `${trailMsg} Migrated ${convertQty} units to ${newSkuName}`, audit: "MIGRATION", record_type: "SKU_MIGRATION", dest_store: "", staff: currentUser
+        });
+        window.GLOBAL_TRANSACTIONS.push({
+            id: addRef.id, timestamp: timestamp, region: region, type: "OUTLET", store: outletName, sku: newSkuName, qty: Math.abs(convertQty), val: 0, remarks: `${trailMsg} Received ${convertQty} units from ${oldSkuName}`, audit: "MIGRATION", record_type: "SKU_MIGRATION", dest_store: "", staff: currentUser
+        });
+        window.GLOBAL_TRANSACTIONS.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         
         if(window.showToast) window.showToast(`Success! Converted ${convertQty} units to ${newSkuName}!`, "success");
         
