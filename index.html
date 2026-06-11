@@ -1435,25 +1435,37 @@ window.buildFastEncodingGrid = function() {
                   if (actualPrice < (expectedPrice * 0.70)) { auditStatus = "FLAGGED"; }
               }
 
-              // --- VIRTUAL ASSEMBLY ENGINE (BUNDLING) ---
+// --- VIRTUAL ASSEMBLY ENGINE (BUNDLING) ---
               if (txType === 'SALE' && BUNDLE_MAP[sku]) {
                   const comp = BUNDLE_MAP[sku];
                   const totalCompQty = qty * comp.qtyPerBundle;
 
-                  // 1. Deduct the raw component (e.g., 3x CT 400 G)
+                  // 1. Deduct the raw component
                   const deductRef = doc(collection(db, "transaction_ledger"));
                   batch.set(deductRef, {
                       timestamp: exactTime, region: region, type: type, store: store,
                       sku: comp.component, qty: totalCompQty, val: 0, remarks: `Auto-bundled into ${sku}`, audit: "SYSTEM_AUTO",
                       record_type: "BUNDLE_OUT", dest_store: destStore, staff: "System API", system_logged_at: serverTimestamp() 
                   });
+                  // 🚨 INJECT BUNDLE COMPONENT TO MEMORY
+                  window.GLOBAL_TRANSACTIONS.push({
+                      id: deductRef.id, timestamp: exactTime, region: region, type: type, store: store,
+                      sku: comp.component, qty: totalCompQty, val: 0, remarks: `Auto-bundled into ${sku}`, audit: "SYSTEM_AUTO",
+                      record_type: "BUNDLE_OUT", dest_store: destStore, staff: "System API"
+                  });
 
-                  // 2. Receive the finished bundle into inventory (e.g., 1x SET B)
+                  // 2. Receive the finished bundle into inventory
                   const injectRef = doc(collection(db, "transaction_ledger"));
                   batch.set(injectRef, {
                       timestamp: exactTime, region: region, type: type, store: store,
                       sku: sku, qty: qty, val: 0, remarks: `Auto-assembled for Sale`, audit: "SYSTEM_AUTO",
                       record_type: "BUNDLE_IN", dest_store: destStore, staff: "System API", system_logged_at: serverTimestamp() 
+                  });
+                  // 🚨 INJECT BUNDLE ASSEMBLY TO MEMORY
+                  window.GLOBAL_TRANSACTIONS.push({
+                      id: injectRef.id, timestamp: exactTime, region: region, type: type, store: store,
+                      sku: sku, qty: qty, val: 0, remarks: `Auto-assembled for Sale`, audit: "SYSTEM_AUTO",
+                      record_type: "BUNDLE_IN", dest_store: destStore, staff: "System API"
                   });
               }
 
@@ -1465,6 +1477,12 @@ window.buildFastEncodingGrid = function() {
                   sku: sku, qty: qty, val: val, remarks: remarks, audit: auditStatus,
                   record_type: txType, dest_store: destStore, staff: staff,
                   system_logged_at: serverTimestamp() 
+              });
+              // 🚨 INJECT MAIN TRANSACTION TO MEMORY
+              window.GLOBAL_TRANSACTIONS.push({
+                  id: newDocRef.id, timestamp: exactTime, region: region, type: type, store: store,
+                  sku: sku, qty: qty, val: val, remarks: remarks, audit: auditStatus,
+                  record_type: txType, dest_store: destStore, staff: staff
               });
 
               // 4. RUNNING TALLY UPDATE (Atomic Math)
@@ -1480,9 +1498,12 @@ window.buildFastEncodingGrid = function() {
           
           window.showToast(`Batch of ${rows.length} transactions permanently recorded!`, "success");
           
-          // 🚨 NEW: Auto-Sync Inventory after successful batch save
+          // 🚨 FIX: Force memory array to instantly sort and update all grids without needing an F5 refresh!
+          window.GLOBAL_TRANSACTIONS.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          if(window.renderMiniLedger) window.renderMiniLedger();
           if(window.renderMasterInventory) window.renderMasterInventory();
           if(window.renderExecutiveDashboard) window.renderExecutiveDashboard();
+          if(window.searchMasterLedger) window.searchMasterLedger();
           
           // Clean up the UI
           document.getElementById('form-remarks').value = '';
