@@ -2870,13 +2870,16 @@ let regionSales = 0;
       if(window.renderGlobalLeaderboard) window.renderGlobalLeaderboard();
   };
 
-  // NEW: GLOBAL LEADERBOARD ENGINE
+// NEW: GLOBAL LEADERBOARD ENGINE
   window.renderGlobalLeaderboard = function() {
       const startD = document.getElementById('dash-start-date') ? document.getElementById('dash-start-date').value : "";
       const endD = document.getElementById('dash-end-date') ? document.getElementById('dash-end-date').value : "";
       
       let storeSales = {};
       window.GLOBAL_TRANSACTIONS.forEach(tx => {
+          // 🚨 FIX: Instantly ignore voided/edited records on the leaderboard!
+          if (tx.is_voided) return; 
+
           const txDate = tx.timestamp.substring(0, 10);
           let isDateValid = (!startD || !endD) ? true : (txDate >= startD && txDate <= endD);
           if (tx.record_type === 'SALE' && isDateValid && tx.store) {
