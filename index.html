@@ -3254,13 +3254,14 @@ window.GLOBAL_TRANSACTIONS.forEach(tx => {
           let s = storeInventory[sku];
           const eiColor = s.endInv < 0 ? 'text-red-500' : 'text-slate-800';	
 
-          // MOVING FORECAST (Days of Cover)
-          // 1. Calculate Average Daily Sales during this exact period
-          let avgDailySales = s.sold / diffDays;
+         // MOVING FORECAST (Days of Cover)
+          // 1. Calculate Average Daily Consumption (Sales + Transfers)
+          let totalConsumed = s.sold + s.transferOut;
+          let avgDailyConsumption = totalConsumed / diffDays;
           let docText = '<span class="text-slate-300 italic text-[9px] font-bold">No Data</span>';
           
-          if (s.sold > 0) {
-              let doc = s.endInv / avgDailySales;
+          if (totalConsumed > 0) {
+              let doc = s.endInv / avgDailyConsumption;
               if (s.endInv <= 0) docText = `<span class="px-1.5 py-0.5 bg-red-100 text-red-700 rounded text-[8px] font-black uppercase border border-red-200">Out of Stock</span>`;
               else if (doc < 7) docText = `<span class="px-1.5 py-0.5 bg-red-50 text-red-600 rounded text-[8px] font-black uppercase border border-red-200 shadow-sm animate-pulse">${doc.toFixed(0)} Days Left</span>`;
               else if (doc < 14) docText = `<span class="px-1.5 py-0.5 bg-amber-50 text-amber-600 rounded text-[8px] font-black uppercase border border-amber-200 shadow-sm">${doc.toFixed(0)} Days Left</span>`;
@@ -3751,7 +3752,7 @@ function applyRoleRestrictions() {
       }
       // 3. ACCOUNTING CHECK
       else if (role === "Accounting") {
-          document.getElementById('nav-ledger').style.display = 'none'; // Lock out of encoding
+          // 🚨 FIX: Removed the 'display = none' lock so Accounting can now encode!
           regSelect.disabled = false;
           window.showTab('dash', document.getElementById('nav-dash'));
       }
