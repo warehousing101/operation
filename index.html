@@ -644,6 +644,11 @@
                         </div>
 
                         <div class="pt-6 mt-4">
+                            <div id="pos-grand-total-container" class="hidden flex justify-between items-center mb-4 px-6 py-4 bg-emerald-50 border border-emerald-200 rounded-xl shadow-inner">
+                                <span class="text-xs font-black text-emerald-700 uppercase tracking-widest"><i class="fa-solid fa-calculator mr-2"></i>Batch Grand Total</span>
+                                <span class="text-2xl font-black text-emerald-600 tracking-tight" id="pos-grand-total">₱0.00</span>
+                            </div>
+                            
                             <button type="submit" id="submit-btn" class="w-full py-5 bg-gradient-to-r from-slate-900 to-slate-800 text-white font-black rounded-2xl text-sm shadow-[0_10px_20px_-10px_rgba(0,0,0,0.5)] hover:shadow-[0_10px_25px_-5px_rgba(16,185,129,0.4)] hover:from-emerald-600 hover:to-emerald-500 transition-all duration-300 flex justify-center items-center gap-3 tracking-widest">
                                 <i class="fa-solid fa-check-double text-lg"></i> RECORD TRANSACTION TO LEDGER
                             </button>
@@ -1310,10 +1315,13 @@ window.setTxType = function(type, btn) {
           destInput.required = true;
       }
       
-      document.querySelectorAll('.batch-amt-col').forEach(col => {
+	document.querySelectorAll('.batch-amt-col').forEach(col => {
           if(type === 'SALE') col.classList.remove('hidden');
           else col.classList.add('hidden');
       });
+      
+      // 🚨 NEW: Hide or show the Grand Total when clicking different transaction types
+      if (window.updateBatchGrandTotal) window.updateBatchGrandTotal(); 
   };
 
 window.buildFastEncodingGrid = function() {
@@ -1359,9 +1367,12 @@ window.buildFastEncodingGrid = function() {
           `;
       });
       container.innerHTML = html;
+      
+      // 🚨 NEW: Reset the Grand Total back to zero when the grid resets
+      if (window.updateBatchGrandTotal) window.updateBatchGrandTotal(); 
   };
 
-          // NEW: Smart Auto-Calculation Engine for Batch Rows
+         // NEW: Smart Auto-Calculation Engine for Batch Rows
           window.autoCalcRowVal = function(element) {
               // Find the specific row the user is typing in
               const row = element.closest('.batch-item-row');
@@ -1379,6 +1390,35 @@ window.buildFastEncodingGrid = function() {
                   } else {
                       amtInput.value = "";
                   }
+              }
+              
+              // 🚨 NEW: Trigger the Grand Total Recalculation instantly
+              if (window.updateBatchGrandTotal) window.updateBatchGrandTotal();
+          };
+
+          // 🚨 NEW: Grand Total Math Engine
+          window.updateBatchGrandTotal = function() {
+              const isSale = document.getElementById('form-tx-type').value === 'SALE';
+              const totalContainer = document.getElementById('pos-grand-total-container');
+              const totalDisplay = document.getElementById('pos-grand-total');
+              
+              if (!totalContainer || !totalDisplay) return;
+
+              if (!isSale) {
+                  totalContainer.classList.add('hidden');
+                  return;
+              }
+
+              let grandTotal = 0;
+              document.querySelectorAll('.batch-amt').forEach(input => {
+                  grandTotal += parseFloat(input.value) || 0;
+              });
+
+              if (grandTotal > 0) {
+                  totalContainer.classList.remove('hidden');
+                  totalDisplay.innerText = '₱' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+              } else {
+                  totalContainer.classList.add('hidden');
               }
           };
 
