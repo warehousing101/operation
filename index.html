@@ -898,11 +898,20 @@
     <div id="config-mod-view-skus" class="config-module-content space-y-6 hidden">
         <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-t-4 border-blue-600">
             <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-4"><i class="fa-solid fa-box text-blue-600 mr-2"></i> Publish Master SKU</h4>
-            <form onsubmit="addSKU(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+            <form onsubmit="addSKU(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">SKU Code</label><input type="text" id="new-sku-code" class="form-input" placeholder="e.g., CT400" required></div>
                 <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Full Product Name</label><input type="text" id="new-sku-name" class="form-input" placeholder="e.g., Classic Turmeric 400g" required></div>
                 <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Standard Price (₱)</label><input type="number" id="new-sku-price" step="0.01" class="form-input" placeholder="0.00" required></div>
-                <div class="md:col-span-3"><button type="submit" class="w-full py-4 bg-blue-600 text-white font-black rounded-xl text-xs shadow-md hover:bg-blue-700 uppercase tracking-widest">Publish SKU</button></div>
+                <div>
+                    <label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">POS Column Assignment</label>
+                    <select id="new-sku-col" class="form-input text-blue-700" required>
+                        <option value="1">Column 1 (Far Left)</option>
+                        <option value="2">Column 2 (Center Left)</option>
+                        <option value="3">Column 3 (Center Right)</option>
+                        <option value="4">Column 4 (Far Right / Sets)</option>
+                    </select>
+                </div>
+                <div class="md:col-span-4"><button type="submit" class="w-full py-4 bg-blue-600 text-white font-black rounded-xl text-xs shadow-md hover:bg-blue-700 uppercase tracking-widest">Publish SKU</button></div>
             </form>
         </div>
         
@@ -1081,21 +1090,19 @@
   // NEW: Import Official Firebase Auth
   import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
   
-  // 1. PRIMARY APP (IMS)
-// 1. PRIMARY APP (IMS)
-  const imsConfig = {
-    apiKey: "AIzaSyAYYnWnhK7qSt8RbNgELdoozodYW_z22FI", // <-- THE FIXED KEY
-    authDomain: "ims-mil.firebaseapp.com",
-    projectId: "ims-mil",
-    storageBucket: "ims-mil.firebasestorage.app",
-    messagingSenderId: "304701295633",
-    appId: "1:304701295633:web:0189312384b407fce7f5b0",
-    measurementId: "G-FL26JYSENZ"
-  };
-  const app = initializeApp(imsConfig);
-  
-  // 🔥 ENTERPRISE CACHING ENABLED: Turns your browser into an offline database!
-  const db = initializeFirestore(app, { localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}) });
+const imsConfig = {
+  apiKey: "AIzaSyAYYnWnhK7qSt8RbNgELdoozodYW_z22FI",
+  authDomain: "ims-mil.firebaseapp.com",
+  projectId: "ims-mil",
+  storageBucket: "ims-mil.firebasestorage.app",
+  messagingSenderId: "304701295633",
+  appId: "1:304701295633:web:0189312384b407fce7f5b0",
+  measurementId: "G-FL26JYSENZ"
+};
+const app = initializeApp(imsConfig);
+
+// 🔥 ENTERPRISE CACHING ENABLED: Turns your browser into an offline database!
+const db = initializeFirestore(app, { localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()}) });
   const auth = getAuth(app); // Turns on the Auth Engine
 
   // --- FIREBASE READ TRACKER ENGINE ---
@@ -1327,50 +1334,72 @@ window.setTxType = function(type, btn) {
 window.buildFastEncodingGrid = function() {
       const container = document.getElementById('batch-rows-container');
       const isSale = document.getElementById('form-tx-type').value === 'SALE';
-      
-      if (!window.SKU_DATA || Object.keys(window.SKU_DATA).length === 0) {
-          container.innerHTML = `<p class="text-xs text-slate-400 font-bold italic text-center py-4">Awaiting Database...</p>`;
-          return;
-      }
+      if (!window.SKU_DATA || Object.keys(window.SKU_DATA).length === 0) return;
 
-      let html = '';
-      Object.keys(window.SKU_DATA).sort().forEach(sku => {
+      // 🚨 STRICT REVISED 1 to 18 LIST (Pag kasunod sunod)
+      const exactOrder = [
+          'PGBP 150 G', 'PMP 150 G', 'PGRP 150 G', 'PTP 150 G', 'PMTP 150 G', 'PMTP 150G - NEW SRP', 
+          'TG 200 G', 'CT 100 G', 'TC 200 G', 'TC 350 G', 'CT 400 G', 
+          'INSULIN', 'INSULIN NSRP', 'BIJ 15 G', 'HAJ 20 G', 'SET B', 'SET D', 'BFH 450 G'
+      ];
+
+     const getColumn = (sku) => {
+          // 🚨 RESTORED: Check the database first!
+          const item = window.SKU_DATA[sku];
+          if (item && item.pos_column) return parseInt(item.pos_column);
+          
+          // Legacy Fallback
+          if (['PGBP 150 G', 'PMP 150 G', 'PGRP 150 G', 'PTP 150 G', 'PMTP 150 G', 'PMTP 150G - NEW SRP'].includes(sku)) return 1;
+          if (['TG 200 G', 'CT 100 G', 'TC 350 G', 'CT 400 G', 'TC 200 G'].includes(sku)) return 2;
+          if (['BFH 450 G', 'INSULIN', 'INSULIN NSRP', 'BIJ 15 G', 'HAJ 20 G'].includes(sku)) return 3;
+          return 4; 
+      };
+
+      const generateCard = (sku) => {
           const item = window.SKU_DATA[sku];
           const rowId = 'batch-row-' + sku.replace(/[^a-zA-Z0-9]/g, '');
-          
-          html += `
+          return `
           <div id="${rowId}" class="batch-item-row bg-white p-3 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-400 hover:ring-1 hover:ring-emerald-400 transition-all flex flex-col gap-3">
-              
               <div class="flex justify-between items-center border-b border-slate-100 pb-2">
                   <div class="flex items-center gap-2">
-                      <div class="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
-                          <i class="fa-solid fa-box text-emerald-500 text-[10px]"></i>
-                      </div>
+                      <div class="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center shrink-0"><i class="fa-solid fa-box text-emerald-500 text-[10px]"></i></div>
                       <input type="text" class="batch-sku bg-transparent text-slate-800 font-black text-sm outline-none cursor-default w-full truncate" value="${sku}" readonly tabindex="-1">
                   </div>
                   <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate max-w-[100px] ml-2" title="${item.name}">${item.name}</span>
               </div>
-              
               <div class="flex gap-2 items-center">
-                  <div class="relative flex-1">
-                      <i class="fa-solid fa-hashtag absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[10px]"></i>
-                      <input type="number" min="0" oninput="window.autoCalcRowVal(this)" onwheel="this.blur()" class="batch-qty w-full bg-white border border-slate-200 text-center font-black text-blue-600 text-sm py-2 pl-7 pr-2 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-300 shadow-inner" placeholder="Qty">
-                  </div>
-                  
-                  <div class="relative flex-1 batch-amt-col ${isSale ? '' : 'hidden'}">
-                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 font-black text-[10px]">₱</span>
-                      <input type="number" step="0.01" class="batch-amt w-full bg-emerald-50/50 border border-emerald-100 text-emerald-700 font-black text-sm py-2 pl-7 pr-2 rounded-xl outline-none cursor-not-allowed" placeholder="0.00" readonly tabindex="-1">
-                  </div>
+                  <div class="relative flex-1"><i class="fa-solid fa-hashtag absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[10px]"></i><input type="number" min="0" oninput="window.autoCalcRowVal(this)" onwheel="this.blur()" class="batch-qty w-full bg-white border border-slate-200 text-center font-black text-blue-600 text-sm py-2 pl-7 pr-2 rounded-xl focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all placeholder:text-slate-300 shadow-inner" placeholder="Qty"></div>
+                  <div class="relative flex-1 batch-amt-col ${isSale ? '' : 'hidden'}"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 font-black text-[10px]">₱</span><input type="number" step="0.01" class="batch-amt w-full bg-emerald-50/50 border border-emerald-100 text-emerald-700 font-black text-sm py-2 pl-7 pr-2 rounded-xl outline-none cursor-not-allowed" placeholder="0.00" readonly tabindex="-1"></div>
               </div>
+          </div>`;
+      };
 
-          </div>
-          `;
+      let col1HTML = ''; let col2HTML = ''; let col3HTML = ''; let col4HTML = '';
+
+      // Force sort by Exact Array Position
+      Object.keys(window.SKU_DATA).sort((a,b) => {
+          let idxA = exactOrder.indexOf(a); let idxB = exactOrder.indexOf(b);
+          if (idxA === -1) idxA = 9999; if (idxB === -1) idxB = 9999;
+          if (idxA !== idxB) return idxA - idxB;
+          return a.localeCompare(b); // Alphabetical tie-breaker for new items!
+      }).forEach(sku => {
+          const colNum = getColumn(sku);
+          if (colNum === 1) col1HTML += generateCard(sku);
+          else if (colNum === 2) col2HTML += generateCard(sku);
+          else if (colNum === 3) col3HTML += generateCard(sku);
+          else col4HTML += generateCard(sku);
       });
-      container.innerHTML = html;
-      
-      // 🚨 NEW: Reset the Grand Total back to zero when the grid resets
+
+      container.innerHTML = `
+        <div class="flex flex-col gap-3">${col1HTML}</div>
+        <div class="flex flex-col gap-3">${col2HTML}</div>
+        <div class="flex flex-col gap-3">${col3HTML}</div>
+        <div class="flex flex-col gap-3">${col4HTML}</div>
+      `;
       if (window.updateBatchGrandTotal) window.updateBatchGrandTotal(); 
   };
+
+
 
          // NEW: Smart Auto-Calculation Engine for Batch Rows
           window.autoCalcRowVal = function(element) {
@@ -1396,7 +1425,7 @@ window.buildFastEncodingGrid = function() {
               if (window.updateBatchGrandTotal) window.updateBatchGrandTotal();
           };
 
-          // 🚨 NEW: Grand Total Math Engine
+          // 🚨 NEW: Grand Total Math Engine (With Outlet & Date Verification)
           window.updateBatchGrandTotal = function() {
               const isSale = document.getElementById('form-tx-type').value === 'SALE';
               const totalContainer = document.getElementById('pos-grand-total-container');
@@ -1417,6 +1446,17 @@ window.buildFastEncodingGrid = function() {
               if (grandTotal > 0) {
                   totalContainer.classList.remove('hidden');
                   totalDisplay.innerText = '₱' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2});
+                  
+                  // 🚨 INJECT STORE & DATE INTO BANNER
+                  const store = document.getElementById('form-store').value || "No Outlet Selected";
+                  const rawDate = document.getElementById('form-date').value;
+                  const formattedDate = rawDate ? new Date(rawDate).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) : "No Date";
+                  
+                  const labelSpan = totalContainer.querySelector('span:first-child');
+                  if(labelSpan) {
+                      labelSpan.innerHTML = `<i class="fa-solid fa-calculator mr-2"></i>Batch Grand Total <span class="text-[9px] text-emerald-600 bg-white/60 border border-emerald-200 px-2 py-1 rounded ml-3 shadow-sm truncate max-w-[200px] md:max-w-none inline-block align-middle">📍 ${store} &bull; 🕒 ${formattedDate}</span>`;
+                  }
+                  
               } else {
                   totalContainer.classList.add('hidden');
               }
@@ -1548,9 +1588,17 @@ window.buildFastEncodingGrid = function() {
           // Clean up the UI
           document.getElementById('form-remarks').value = '';
           document.getElementById('form-date').value = window.getExactDatetimeLocal();
+          
+          // 🚨 CLEAR OUTLET INPUT BOX
+          document.getElementById('form-store').value = '';
+          document.getElementById('auto-routing-text').innerHTML = 'Select an outlet first...';
+          document.getElementById('auto-routing-text').className = 'text-sm font-bold text-slate-400 italic relative z-10';
+          document.getElementById('form-region').value = '';
+          document.getElementById('form-type').value = '';
+
           window.buildFastEncodingGrid(); // Reset all boxes to zero!
           
-      } catch (error) { 
+      } catch (error) {
           console.error(error);
           window.showToast("Error saving batch to cloud.", "error"); 
       } finally { 
@@ -1576,12 +1624,15 @@ window.buildFastEncodingGrid = function() {
       const code = document.getElementById('new-sku-code').value;
       const name = document.getElementById('new-sku-name').value;
       const price = parseFloat(document.getElementById('new-sku-price').value);
+      // 🚨 NEW: Grab the column number from the dropdown
+      const colNum = parseInt(document.getElementById('new-sku-col').value) || 4; 
       const origText = btn.innerHTML; btn.innerHTML = `Publishing...`;
       try {
           const masterRef = doc(db, "system_settings", "master");
           const docSnap = await getDoc(masterRef);
           let currentSkus = docSnap.exists() ? docSnap.data().skus || {} : {};
-          currentSkus[code] = { name: name, price: price };
+          // 🚨 NEW: Save pos_column to the database!
+          currentSkus[code] = { name: name, price: price, pos_column: colNum };
           await updateDoc(masterRef, { skus: currentSkus });
           window.showToast(`SKU ${code} published successfully!`, "success"); e.target.reset(); window.loadMasterSettings();
       } catch (error) { window.showToast("Error saving SKU.", "error"); } finally { btn.innerHTML = origText; }
@@ -2324,8 +2375,6 @@ window.syncGlobalMonth = async function() {
   };
 
 window.renderMasterInventory = function() {
-
-	
       const tbody = document.getElementById('master-inv-body');
       const queryText = document.getElementById('inv-search') ? document.getElementById('inv-search').value.toLowerCase() : '';
       const timeFilter = document.getElementById('inv-time-filter') ? document.getElementById('inv-time-filter').value : 'ALL';
@@ -2345,24 +2394,20 @@ window.renderMasterInventory = function() {
           return;
       }
 
-let invData = {};
+      let invData = {};
       Object.keys(window.SKU_DATA).forEach(sku => {
           invData[sku] = { name: window.SKU_DATA[sku].name, price: window.SKU_DATA[sku].price, begInv: 0, in: 0, sold: 0, bo: 0, bundleOut: 0 };
       });
 
       window.GLOBAL_TRANSACTIONS.forEach(tx => {
-    if (tx.is_voided) return; // <--- PASTE IT EXACTLY HERE
-    
-    if(!invData[tx.sku]) return;
-    
-    const qty = parseFloat(tx.qty) || 0;
-
+          if (tx.is_voided) return; 
+          if(!invData[tx.sku]) return;
+          
+          const qty = parseFloat(tx.qty) || 0;
           const txDate = tx.timestamp.substring(0, 10);
           const rType = tx.record_type;
-
           const isValidSource = window.OUTLET_DATA && window.OUTLET_DATA[tx.store];
 
-          // STRICT GLOBAL VIEW: Internal Transfers are completely ignored.
           if (timeFilter === 'MONTH' && startStr && endStr) {
               if (txDate < startStr) {
                   if (isValidSource) {
@@ -2382,36 +2427,45 @@ let invData = {};
                   if(rType === 'SALE') invData[tx.sku].sold += qty;
                   else if(rType === 'BO') invData[tx.sku].bo += qty;
                   else if(rType === 'BUNDLE_OUT') invData[tx.sku].bundleOut += qty; 
-                  // 🚨 FIX 5 APPLIED HERE: Added SKU_MIGRATION to the All-Time View
                   else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN' || rType === 'SKU_MIGRATION') invData[tx.sku].in += qty;
               }
           }
       });
 
-      // 🚨 FIX: Calculate exactly how many days are in the selected period for accurate math
       let diffDays = 1;
       if (timeFilter === 'MONTH' && startStr && endStr) {
           const s = new Date(startStr); const e = new Date(endStr);
           diffDays = Math.ceil(Math.abs(e - s) / (1000 * 60 * 60 * 24)) + 1;
       } else {
-          // If All-Time (YTD) is selected, calculate from Jan 1st to Today
           const today = new Date();
           const startOfYear = new Date(today.getFullYear(), 0, 1);
           diffDays = Math.ceil(Math.abs(today - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
       }
 
+      // 🚨 STRICT REVISED 1 to 18 LIST (Pag kasunod sunod)
+      const exactOrder = [
+          'PGBP 150 G', 'PMP 150 G', 'PGRP 150 G', 'PTP 150 G', 'PMTP 150 G', 'PMTP 150G - NEW SRP', 
+          'TG 200 G', 'CT 100 G', 'TC 200 G', 'TC 350 G', 'CT 400 G', 
+          'INSULIN', 'INSULIN NSRP', 'BIJ 15 G', 'HAJ 20 G', 'SET B', 'SET D', 'BFH 450 G'
+      ];
+
+      // 🚨 FIXED: NO MORE JAVASCRIPT CRASH!
+      let sortedSkus = Object.keys(invData).sort((a, b) => {
+          let idxA = exactOrder.indexOf(a); let idxB = exactOrder.indexOf(b);
+          if (idxA === -1) idxA = 9999; if (idxB === -1) idxB = 9999;
+          if (idxA !== idxB) return idxA - idxB;
+          return a.localeCompare(b);
+      });
+
       let html = '';
-      Object.keys(invData).sort().forEach(sku => {
+      sortedSkus.forEach(sku => {
           const item = invData[sku];
           if(queryText && !`${sku} ${item.name}`.toLowerCase().includes(queryText)) return;
           
-          // NET PHYSICAL STOCK: Safely deducting consumed bundle materials without cluttering UI
           const endInv = item.begInv + item.in - item.sold - item.bo - item.bundleOut;
-          
           const assetVal = endInv > 0 ? endInv * item.price : 0;
           const eiColor = endInv < 0 ? 'text-red-500' : 'text-slate-800';
 
-          // 🚨 FIX: Generate the Global Forecast Badge
           let avgDailySales = item.sold / diffDays;
           let docText = '<span class="text-slate-300 italic text-[9px] font-bold">No Data</span>';
           
@@ -3287,10 +3341,23 @@ window.GLOBAL_TRANSACTIONS.forEach(tx => {
       document.getElementById('dash-bottom-sku').innerHTML = hadSales ? `${bottomSKU.id}<br><span class="text-[10px] text-slate-400 font-bold">${bottomSKU.name}</span>` : `<span class="text-slate-400 italic font-bold">No sales in period</span>`;
 
      // RENDER INVENTORY TABLE WITH FORECAST
-      // RENDER INVENTORY TABLE WITH FORECAST
       const invBody = document.getElementById('dash-outlet-inventory');
-      // NEW: Added .sort() so "CT", "P", and "SET" always group perfectly alphabetically and never jump around!
-      invBody.innerHTML = Object.keys(storeInventory).sort().map(sku => {
+      
+ // 🚨 STRICT REVISED 1 to 18 LIST (Pag kasunod sunod)
+      const exactOrder = [
+          'PGBP 150 G', 'PMP 150 G', 'PGRP 150 G', 'PTP 150 G', 'PMTP 150 G', 'PMTP 150G - NEW SRP', 
+          'TG 200 G', 'CT 100 G', 'TC 200 G', 'TC 350 G', 'CT 400 G', 
+          'INSULIN', 'INSULIN NSRP', 'BIJ 15 G', 'HAJ 20 G', 'SET B', 'SET D', 'BFH 450 G'
+      ];
+
+      let sortedStoreSkus = Object.keys(storeInventory).sort((a, b) => {
+          let idxA = exactOrder.indexOf(a); let idxB = exactOrder.indexOf(b);
+          if (idxA === -1) idxA = 9999; if (idxB === -1) idxB = 9999;
+          if (idxA !== idxB) return idxA - idxB;
+          return a.localeCompare(b);
+      });
+
+      invBody.innerHTML = sortedStoreSkus.map(sku => {
           let s = storeInventory[sku];
           const eiColor = s.endInv < 0 ? 'text-red-500' : 'text-slate-800';	
 
