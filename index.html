@@ -2070,7 +2070,7 @@ window.syncGlobalMonth = async function() {
       // Inject Top Level Metrics
       document.getElementById('dash-top-rev').innerText = `₱${totalRev.toLocaleString(undefined, {minimumFractionDigits:2})}`;
       
-    // ENTERPRISE: GLOBAL ASSET VALUE (Bulletproof Calculation)
+   // ENTERPRISE: GLOBAL ASSET VALUE (Bulletproof Calculation)
       let globalAssetValue = 0;
       let globalInv = {};
       if(window.SKU_DATA) {
@@ -2079,7 +2079,7 @@ window.syncGlobalMonth = async function() {
           });
           
           window.GLOBAL_TRANSACTIONS.forEach(tx => {
-              if (tx.is_voided) return; // 🚨 THE FIX: Completely ignore deleted/voided ghost records!
+              if (tx.is_voided) return; 
               if(!globalInv[tx.sku]) return;
 
               const txDate = tx.timestamp.substring(0, 10);
@@ -2088,19 +2088,14 @@ window.syncGlobalMonth = async function() {
                   const qty = parseFloat(tx.qty) || 0;
                   const rType = tx.record_type;
                   
-                  // STRICT ENGINE ALIGNMENT: 
-                  // By tracking Source and Dest Regions explicitly, the Dashboard will now mathematically 
-                  // mirror the exact sum of your Regional Hubs, dropping all Ghost Transactions.
-                  let sourceRegion = window.OUTLET_DATA && window.OUTLET_DATA[tx.store] ? window.normalizeRegion(window.OUTLET_DATA[tx.store].region) : null;
-                  let destRegion = window.OUTLET_DATA && window.OUTLET_DATA[tx.dest_store] ? window.normalizeRegion(window.OUTLET_DATA[tx.dest_store].region) : null;
+                  // 🚨 STRICT ENGINE ALIGNMENT (Identical to Master Inventory Logic)
+                  const isValidSource = window.OUTLET_DATA && window.OUTLET_DATA[tx.store];
 
-                  if (sourceRegion) {
-                      if(rType === 'SALE' || rType === 'BO' || rType === 'BUNDLE_OUT' || rType === 'TRANSFER') globalInv[tx.sku].qty -= qty;
-                      else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN') globalInv[tx.sku].qty += qty;
-                  }
-                  
-                  if (destRegion && rType === 'TRANSFER') {
-                      globalInv[tx.sku].qty += qty;
+                  if (isValidSource) {
+                      // Transfers between stores do not change global stock, only deduct for real loss
+                      if(rType === 'SALE' || rType === 'BO' || rType === 'BUNDLE_OUT') globalInv[tx.sku].qty -= qty;
+                      // MIGRATIONS are now perfectly processed here!
+                      else if(rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN' || rType === 'SKU_MIGRATION') globalInv[tx.sku].qty += qty;
                   }
               }
           });
@@ -3102,9 +3097,14 @@ window.GLOBAL_TRANSACTIONS.forEach(tx => {
 
           // STRICT DECOUPLING: Identify exactly what role this store/region plays in the transaction
           if (isGodView) {
-              if (tx.region === filterRegion) { isSource = true; isRelevant = true; }
+              // 🚨 FIX: Use normalizeRegion so Visayas automatically catches Cebu, Tacloban, and Iloilo!
+              let normSource = window.normalizeRegion(tx.region);
+              if (normSource === filterRegion) { isSource = true; isRelevant = true; }
+              
               let destRegion = window.OUTLET_DATA && window.OUTLET_DATA[tx.dest_store] ? window.OUTLET_DATA[tx.dest_store].region : null;
-              if (tx.record_type === 'TRANSFER' && destRegion === filterRegion) {
+              let normDest = window.normalizeRegion(destRegion);
+              
+              if (tx.record_type === 'TRANSFER' && normDest === filterRegion) {
                   isDest = true; isRelevant = true;
               }
           } else {
