@@ -3097,14 +3097,21 @@ window.GLOBAL_TRANSACTIONS.forEach(tx => {
 
           // STRICT DECOUPLING: Identify exactly what role this store/region plays in the transaction
           if (isGodView) {
-              // 🚨 FIX: Use normalizeRegion so Visayas automatically catches Cebu, Tacloban, and Iloilo!
-              let normSource = window.normalizeRegion(tx.region);
-              if (normSource === filterRegion) { isSource = true; isRelevant = true; }
+              // 🚨 SMART FIX: If viewing Visayas, group them. If viewing a specific sub-region, strict match!
+              const checkMatch = (dbReg, targetReg) => {
+                  if(!dbReg) return false;
+                  if(targetReg === 'Visayas') {
+                      const low = dbReg.toLowerCase();
+                      return low === 'cebu' || low === 'iloilo' || low === 'tacloban' || low === 'visayas';
+                  }
+                  return dbReg === targetReg;
+              };
+
+              if (checkMatch(tx.region, filterRegion)) { isSource = true; isRelevant = true; }
               
               let destRegion = window.OUTLET_DATA && window.OUTLET_DATA[tx.dest_store] ? window.OUTLET_DATA[tx.dest_store].region : null;
-              let normDest = window.normalizeRegion(destRegion);
               
-              if (tx.record_type === 'TRANSFER' && normDest === filterRegion) {
+              if (tx.record_type === 'TRANSFER' && checkMatch(destRegion, filterRegion)) {
                   isDest = true; isRelevant = true;
               }
           } else {
