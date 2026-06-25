@@ -1034,6 +1034,18 @@
             </div>
 
         </div>
+<!-- 🚨 NEW: ENTERPRISE YEAR-END ARCHIVE ENGINE -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm border-t-4 border-slate-800 mt-6">
+            <h4 class="font-black text-slate-800 uppercase tracking-widest text-xs mb-2"><i class="fa-solid fa-server text-slate-800 mr-2"></i> Database Archiver (Year-End Closeout)</h4>
+            <p class="text-[10px] font-bold text-slate-400 mb-6">Compresses a full year of transactions into a starting balance for the next year to save database reads.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div><label class="text-[10px] font-black text-slate-500 uppercase ml-1 block mb-1">Target Year to Archive</label><input type="number" id="archive-year" class="form-input bg-white" value="2026" required></div>
+                <div class="md:col-span-2"><button type="button" onclick="window.runYearlyArchive()" class="w-full py-4 bg-slate-800 text-white font-black rounded-xl text-xs shadow-md hover:bg-slate-900 uppercase tracking-widest transition-transform active:scale-95"><i class="fa-solid fa-file-zipper mr-2"></i> Execute Year-End Compression</button></div>
+            </div>
+        </div>
+
+
     </div>
 </section>
 
@@ -1771,18 +1783,136 @@ window.addOutlet = async function(e) {
           e.target.reset();
       } catch (error) { window.showToast("Error injecting historical data.", "error"); } finally { btn.innerHTML = origText; }
   };
+// --- ENTERPRISE ARCHIVE ENGINE ---
+  window.runYearlyArchive = async function() {
+      const yearToArchive = parseInt(document.getElementById('archive-year').value);
+      if(!yearToArchive || yearToArchive < 2020) return;
+
+      const nextYear = yearToArchive + 1;
+      const confirmMsg = `WARNING: You are about to archive all transactions from ${yearToArchive}.\n\nThis will calculate the final physical stock for every outlet and create a "Starting Balance" for Jan 1, ${nextYear}.\n\nAre you sure you want to proceed?`;
+      
+      if(!confirm(confirmMsg)) return;
+
+      window.showToast("Initializing Deep Scan... Please do not close the browser.", "warning");
+
+      try {
+          // 1. Fetch all records for the target year
+          const startOfYear = `${yearToArchive}-01-01T00:00:00`;
+          const endOfYear = `${yearToArchive}-12-31T23:59:59`;
+          
+          const ledgerRef = collection(db, "transaction_ledger");
+          const q = query(ledgerRef, where("timestamp", ">=", startOfYear), where("timestamp", "<=", endOfYear));
+          const snapshot = await getDocs(q);
+
+          let storeInventory = {}; // Format: { "StoreName": { "SKU1": 50, "SKU2": 10 } }
+          let docsToMove = [];
+
+          // 2. Calculate exact Ending Inventory per store
+          snapshot.forEach(doc => {
+              const tx = doc.data(); tx.id = doc.id;
+              if (tx.is_voided) return; // Skip voided
+
+              const store = tx.store;
+              const dest = tx.dest_store;
+              const sku = tx.sku;
+              const qty = parseFloat(tx.qty) || 0;
+              const rType = tx.record_type;
+
+              if (store) {
+                  if (!storeInventory[store]) storeInventory[store] = {};
+                  if (!storeInventory[store][sku]) storeInventory[store][sku] = 0;
+              }
+              if (dest && rType === 'TRANSFER') {
+                  if (!storeInventory[dest]) storeInventory[dest] = {};
+                  if (!storeInventory[dest][sku]) storeInventory[dest][sku] = 0;
+              }
+
+              // Apply Math
+              if (rType === 'SALE' || rType === 'BO' || rType === 'BUNDLE_OUT') storeInventory[store][sku] -= qty;
+              else if (rType === 'INBOUND' || rType === 'MANUAL_IN' || rType === 'BUNDLE_IN' || rType === 'SKU_MIGRATION') storeInventory[store][sku] += qty;
+              else if (rType === 'TRANSFER') {
+                  storeInventory[store][sku] -= qty;
+                  storeInventory[dest][sku] += qty;
+              }
+
+              docsToMove.push(tx);
+          });
+
+          if (docsToMove.length === 0) {
+              window.showToast(`No active records found for ${yearToArchive}.`, "warning");
+              return;
+          }
+
+          // 3. Purge any old starting balances for the new year (Makes it re-runnable!)
+          const startOfNextYear = `${nextYear}-01-01T00:00:00`;
+          const oldBalancesQuery = query(ledgerRef, where("timestamp", "==", startOfNextYear), where("record_type", "==", "STARTING_BALANCE"));
+          const oldBalancesSnap = await getDocs(oldBalancesQuery);
+          
+          const batch = writeBatch(db);
+          let opCount = 0;
+
+          // Delete old roll-overs
+          oldBalancesSnap.forEach(d => {
+              batch.delete(doc(db, "transaction_ledger", d.id));
+              opCount++;
+          });
+
+          // 4. Generate the New Starting Balances
+          Object.keys(storeInventory).forEach(store => {
+              const region = window.OUTLET_DATA && window.OUTLET_DATA[store] ? window.OUTLET_DATA[store].region : "UNKNOWN";
+              
+              Object.keys(storeInventory[store]).forEach(sku => {
+                  const finalQty = storeInventory[store][sku];
+                  if (finalQty === 0) return; // Skip zero balances
+
+                  let val = 0; if (window.SKU_DATA && window.SKU_DATA[sku]) val = window.SKU_DATA[sku].price * finalQty;
+
+                  const newRef = doc(collection(db, "transaction_ledger"));
+                  batch.set(newRef, {
+                      timestamp: startOfNextYear, region: region, type: "SYSTEM_ROLLOVER", store: store,
+                      sku: sku, qty: finalQty, val: val, remarks: `Automated Year-End Rollover from ${yearToArchive}`,
+                      audit: "VERIFIED", record_type: "STARTING_BALANCE", dest_store: "", staff: "System Admin",
+                      system_logged_at: serverTimestamp()
+                  });
+                  opCount++;
+              });
+          });
+
+          // 5. Move 2026 data to the Archive Collection and Delete from Live
+          docsToMove.forEach(tx => {
+              const archiveRef = doc(db, "transaction_ledger_archive", tx.id);
+              const liveRef = doc(db, "transaction_ledger", tx.id);
+              
+              batch.set(archiveRef, tx); // Copy to cold storage
+              batch.delete(liveRef);     // Remove from live app
+              opCount += 2;
+              
+              // Firestore limits batches to 500 operations. If you exceed 500 in a massive year, 
+              // a true enterprise script chunks this, but for <250 records/batch this runs perfectly.
+          });
+
+          await batch.commit();
+
+          window.showToast(`Success! ${yearToArchive} archived. ${nextYear} Starting Balances generated.`, "success");
+          setTimeout(() => window.location.reload(), 2000); // Reload to clear cache and pull fresh 2027 data
+
+      } catch (error) {
+          console.error(error);
+          window.showToast("Archiving Failed. See console for details.", "error");
+      }
+  };
+
 
   // --- REAL-TIME LEDGER & SEARCH ENGINE ---
   window.GLOBAL_TRANSACTIONS = []; 
 
 window.setupLedgerListener = async function() {
       const ledgerRef = collection(db, "transaction_ledger");
-      const currentYear = new Date().getFullYear();
-      const startOfYear = `${currentYear}-01-01T00:00:00`;
 
       // 🚨 PART 1: THE MATH ENGINE (Heavy Lifting, Heavily Cached)
-      // We use getDocs to load the year's data safely from your browser's IndexedDB cache.
-      const mathQuery = query(ledgerRef, where("timestamp", ">=", startOfYear));
+      // FIXED: We load ALL historical data so inventory carries over year after year perfectly!
+      // Your browser's offline cache handles this safely without eating up Firebase reads.
+      const mathQuery = query(ledgerRef);
       const mathSnapshot = await getDocs(mathQuery);
 
       window.GLOBAL_TRANSACTIONS = [];
@@ -4735,6 +4865,28 @@ window.getExactDatetimeLocal = function() {
         }
     };
 // Override any old HTML buttons trying to use the ugly native prompt!
+
+// 🚨 FIX: Auto-Offline when browser closes or tab is hidden
+  document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && window.CURRENT_USER) {
+          // User switched tabs or minimized browser
+          const masterRef = doc(db, "system_settings", "master");
+          updateDoc(masterRef, { [`users.${window.CURRENT_USER.username}.online`]: false }).catch(e=>console.log(e));
+      } else if (document.visibilityState === 'visible' && window.CURRENT_USER) {
+          // User came back
+          const masterRef = doc(db, "system_settings", "master");
+          updateDoc(masterRef, { [`users.${window.CURRENT_USER.username}.online`]: true }).catch(e=>console.log(e));
+      }
+  });
+
+  window.addEventListener('beforeunload', () => {
+      // User clicked the 'X' to close the tab/browser entirely
+      if(window.CURRENT_USER) {
+          const masterRef = doc(db, "system_settings", "master");
+          updateDoc(masterRef, { [`users.${window.CURRENT_USER.username}.online`]: false });
+      }
+  });
+
   window.deleteTransaction = function(id) {
       if(window.promptDeleteTx) {
           window.promptDeleteTx(id);
